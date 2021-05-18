@@ -1,6 +1,6 @@
 default:
-	@rollup -c
-
-	# @cp dist/minimalcomps.js demos/globaldemo/
-	# @cp dist/minimalcomps.mjs demos/moduledemo/
+	@#rollup -c
+	@WINDOWID=`xdotool getactivewindow`
+	@xdotool search --name "Mozilla Firefox" windowactivate --sync key --clearmodifiers ctrl+r
+	@xdotool windowactivate ${WINDOWID} --sync
 

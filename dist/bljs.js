@@ -1,4 +1,4 @@
-var mc2 = (function (exports) {
+var bljs = (function (exports) {
   'use strict';
 
   const ContextMethods = {

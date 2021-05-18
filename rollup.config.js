@@ -4,7 +4,7 @@ export default {
     {
       file: 'dist/bljs.js',
       format: 'iife',
-      name: "mc2",
+      name: "bljs",
     },
     {
       file: 'dist/bljs.mjs',
