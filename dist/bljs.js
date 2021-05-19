@@ -1,6 +1,657 @@
 var bljs = (function (exports) {
   'use strict';
 
+  function Anim(renderCallback, fps) {
+    return {
+      startTime: 0,
+      fps: fps || 60,
+      renderCallback: renderCallback,
+
+      start: function () {
+        if (!this.running) {
+          this.running = true;
+          this.render();
+        }
+        this.shouldKill = false;
+        this.startTime = Date.now();
+        return this;
+      },
+
+      stop: function () {
+        this.shouldKill = true;
+        return this;
+      },
+
+      toggle: function () {
+        if (this.running) {
+          this.stop();
+        }
+        else {
+          this.start();
+        }
+        return this;
+      },
+
+      render: function () {
+        if(this.shouldKill) {
+          this.shouldKill = false;
+          this.running = false;
+        }
+        if (this.running) {
+          if (this.renderCallback) {
+            this.renderCallback(Date.now() - this.startTime);
+          }
+          setTimeout(() => {
+            requestAnimationFrame(() => {
+              this.render();
+            });
+          }, 1000 / this.fps);
+        }
+      }
+    };
+  }
+
+  const Random = {
+    _seed: Date.now(),
+    _a: 1664525,
+    _c: 1013904223,
+    _m: Math.pow(2, 32),
+
+    seed: function(seed) {
+      Random._seed = seed;
+    },
+
+    _int: function() {
+      // range [0, 2^32)
+      Random._seed = (Random._seed * Random._a + Random._c) % Random._m;
+      return Random._seed;
+    },
+
+    _float: function() {
+      // range [0, 1)
+      return Random._int() / Random._m;
+    },
+
+    bool: function(percent) {
+      // percent is chance of getting true
+      if(percent == null) {
+        percent = 0.5;
+      }
+      return Random._float() < percent;
+    },
+
+    float: function(min, max) {
+      // range [min, max)
+      if(arguments.length === 1) {
+        return Random._float() * min;
+      }
+      if(arguments.length === 2) {
+        return min + Random._float() * (max - min);
+      }
+      return Random._float();
+    },
+
+    int: function(min, max) {
+      // range [min, max)
+      if(arguments.length === 1) {
+        return Math.floor(Random._float() * min);
+      }
+      if(arguments.length === 2) {
+        return Math.floor(Random.float(min, max));
+      }
+      return Random._int();
+    },
+
+    point: function(x, y, w, h) {
+      const xx = Random.float(x, x + w);
+      const yy = Random.float(y, y + h);
+      return { x: xx, y: yy };
+    },
+
+    circle: function(x, y, w, h, rMin, rMax) {
+      const xx = Random.float(x, x + w);
+      const yy = Random.float(y, y + h);
+      const r = Random.float(rMin, rMax);
+      return { x: xx, y: yy, r: r };
+    },
+
+    power: function(min, max, power) {
+      if(arguments.length === 2) {
+        power = max;
+        max = min;
+        min = 0;
+      }
+      return min + Math.pow(Random.float(1), power) * (max - min);
+    },
+
+    powerInt: function(min, max, power) {
+      return Math.floor(Random.power(min, max, power));
+    },
+
+    gauss: function(min, max, g) {
+      if(arguments.length === 2) {
+        g = max;
+        max = min;
+        min = 0;
+      }
+      var total = 0;
+      for(var i = 0; i < g; i++) {
+        total += Random.float(min, max);
+      }
+      return total / g;
+    },
+
+    chooser: function() {
+      return {
+        choices: [],
+        total: 0,
+
+        addChoice: function (choice, weight) {
+          if (weight == null) weight = 1;
+
+          this.choices.push({
+            weight: weight,
+            choice: choice
+          });
+          this.total += weight;
+          return this;
+        },
+
+        getChoice: function () {
+          var rand = Random.float(0, this.total);
+          for (var i = 0; i < this.choices.length; i++) {
+            var choice = this.choices[i];
+            if (rand < choice.weight) {
+              return choice.choice;
+            }
+            rand -= choice.weight;
+          }
+        }
+      }
+    }
+  };
+
+  const Num = {
+    difference: function(a, b) {
+      return Math.abs(a - b);
+    },
+    
+    norm: function (value, min, max) {
+      return (value - min) / (max - min);
+    },
+
+    lerp: function (min, max, t) {
+      return min + (max - min) * t;
+    },
+
+    wrap: function(value, min, max) {
+      const range = max - min;
+      return min + ((((value - min) % range) + range) % range);
+    },
+
+    map: function (srcValue, srcMin, srcMax, dstMin, dstMax) {
+      var norm = this.norm(srcValue, srcMin, srcMax);
+      return this.lerp(dstMin, dstMax, norm);
+    },
+
+    clamp: function (value, min, max) {
+      return Math.min(Math.max(value, min), max);
+    },
+
+    roundTo: function(value, decimal) {
+      const mult = Math.pow(10, decimal);
+      return Math.round(value * mult) / mult;
+    },
+
+    roundToNearest: function(value, mult) {
+      return Math.round(value / mult) * mult;
+    },
+
+    sinRange: function(angle, min, max) {
+      return Num.map(Math.sin(angle), -1, 1, min, max);
+    },
+
+    cosRange: function(angle, min, max) {
+      return Num.map(Math.cos(angle), -1, 1, min, max);
+    },
+
+    lerpSin: function(value, max, min) {
+      return Num.sinRange(value * Math.PI * 2, min, max);
+    },
+
+    equalish: function(a, b, delta) {
+      return Num.difference(a, b) < delta;
+    },
+
+    dotProduct: function(x0, y0, x1, y1, x2, y2, x3, y3) {
+      var dx0 = x1 - x0,
+        dy0 = y1 - y0,
+        dx1 = x3 - x2,
+        dy1 = y3 - y2;
+      return dx0 * dx1 + dy0 * dy1;
+    },
+
+    angleBetween: function(x0, y0, x1, y1, x2, y2, x3, y3) {
+      var dp = this.dotProduct(x0, y0, x1, y1, x2, y2, x3, y3),
+        mag0 = this.dist(x0, y0, x1, y1),
+        mag1 = this.dist(x2, y2, x3, y3);
+      return Math.acos(dp / mag0 / mag1);
+    },
+
+    polarToPoint: function (angle, radius) {
+      return {
+        x: Math.cos(angle) * radius,
+        y: Math.sin(angle) * radius
+      };
+    },
+
+    pointToPolar: function(p) {
+      return {
+        angle: Math.atan2(p.y, p.x),
+        radius: this.magnitude(p)
+      };
+    },
+
+    magnitude: function(p) {
+      return this.dist(0, 0, p.x, p.y);
+    },
+
+    dist: function (x0, y0, x1, y1) {
+      if(arguments.length === 2) {
+        return this.dist(x0.x, x0.y, y0.x, y0.y);
+      }
+      var dx = x1 - x0,
+        dy = y1 - y0;
+      return Math.sqrt(dx * dx + dy * dy);
+    },
+
+    lerpPoint: function(p0, p1, t) {
+      return {
+        x: this.lerp(p0.x, p1.x, t),
+        y: this.lerp(p0.y, p1.y, t)
+      };
+    },
+
+    bezier: function(p0, p1, p2, p3, t) {
+      var oneMinusT = 1 - t,
+        m0 = oneMinusT * oneMinusT * oneMinusT,
+        m1 = 3 * oneMinusT * oneMinusT * t,
+        m2 = 3 * oneMinusT * t * t,
+        m3 = t * t * t;
+      return {
+        x: m0 * p0.x + m1 * p1.x + m2 * p2.x + m3 * p3.x,
+        y: m0 * p0.y + m1 * p1.y + m2 * p2.y + m3 * p3.y
+      };
+    },
+
+    quadratic: function(p0, p1, p2, t) {
+      var oneMinusT = 1 - t,
+        m0 = oneMinusT * oneMinusT,
+        m1 = 2 * oneMinusT * t,
+        m2 = t * t;
+      return {
+        x: m0 * p0.x + m1 * p1.x + m2 * p2.x,
+        y: m0 * p0.y + m1 * p1.y + m2 * p2.y
+      }
+
+    },
+
+    pointInCircle: function(px, py, cx, cy, cr) {
+      var dist = this.dist(px, py, cx, cy);
+      return dist <= cr;
+    },
+
+    pointInRect: function(px, py, rx, ry, rw, rh) {
+      return px >= rx &&
+        py >= ry &&
+        px <= rx + rw &&
+        py <= ry + rh;
+    },
+
+    segmentIntersect: function(p0, p1, p2, p3) {
+      var A1 = p1.y - p0.y,
+        B1 = p0.x - p1.x,
+        C1 = A1 * p0.x + B1 * p0.y,
+        A2 = p3.y - p2.y,
+        B2 = p2.x - p3.x,
+        C2 = A2 * p2.x + B2 * p2.y,
+        denominator = A1 * B2 - A2 * B1;
+
+      if (denominator == 0) {
+        return null;
+      }
+
+      var intersectX = (B2 * C1 - B1 * C2) / denominator,
+        intersectY = (A1 * C2 - A2 * C1) / denominator,
+        rx0 = (intersectX - p0.x) / (p1.x - p0.x),
+        ry0 = (intersectY - p0.y) / (p1.y - p0.y),
+        rx1 = (intersectX - p2.x) / (p3.x - p2.x),
+        ry1 = (intersectY - p2.y) / (p3.y - p2.y);
+
+      if (((rx0 >= 0 && rx0 <= 1) || (ry0 >= 0 && ry0 <= 1)) &&
+        ((rx1 >= 0 && rx1 <= 1) || (ry1 >= 0 && ry1 <= 1))) {
+        return {
+          x: intersectX,
+          y: intersectY
+        };
+      }
+      else {
+        return null;
+      }
+    },
+
+    tangentPointToCircle: function(x, y, cx, cy, cr, anticlockwise) {
+      var dist = Math.dist(x, y, cx, cy),
+        dir = anticlockwise ? 1 : -1,
+        angle = Math.acos(-cr / dist) * dir,
+        baseAngle = Math.atan2(cy - y, cx - x),
+        totalAngle = baseAngle + angle;
+
+      return {
+        x: cx + Math.cos(totalAngle) * cr,
+        y: cy + Math.sin(totalAngle) * cr
+      };
+    },
+
+    hexPoint: function(x, y, size, xfirst) {
+      const sin60r = Math.sin(Math.PI / 3) * size;
+      const xInc = 2 * sin60r;
+      const yInc = size * 1.5;
+      let offset = y % 2 * sin60r;
+      let xx = (x * xInc + offset);
+      let yy = (y * yInc);
+      if (xfirst) {
+        return {x: xx, y: yy};
+      }
+      return {x: yy, y: xx};
+    },
+
+  };
+
+  const Color = {
+    rgb: function(r, g, b) {
+      return Color.rgba(r, g, b, 1);
+    },
+
+    rgba: function(r, g, b, a) {
+      return {
+        red: Math.floor(r),
+        green: Math.floor(g),
+        blue: Math.floor(b),
+        alpha: Math.floor(a),
+        toString: function() {
+          return `rgba(${this.red}, ${this.green}, ${this.blue}, ${this.alpha})`;
+        },
+      };
+    },
+    
+    rgbf: function(r, g, b) {
+      return Color.rgbaf(r, g, b, 1);
+    },
+    
+    rgbaf: function(r, g, b, a) {
+      return Color.rgb(r * 255, g * 255, b * 255, a);
+    },
+
+    number: function(num) {
+      return Color.rgb(num >> 16, num >> 8 & 0xff, num & 0xff);
+    },
+
+    randomRGB: function() {
+      return Color.number(Math.floor(Random.int(0xffffff)));
+    },
+
+    gray: function(shade) {
+      return Color.rgb(shade, shade, shade);
+    },
+
+    randomGray: function() {
+      return Color.gray(Random.int(255));
+    },
+
+    hsv: function(h, s, v) {
+      h /= 360;
+      var r, g, b,
+        i = Math.floor(h * 6),
+        f = h * 6 - i,
+        p = v * (1 - s),
+        q = v * (1 - f * s),
+        t = v * (1 - (1 - f) * s);
+      switch (i % 6) {
+        case 0: r = v, g = t, b = p; break;
+        case 1: r = q, g = v, b = p; break;
+        case 2: r = p, g = v, b = t; break;
+        case 3: r = p, g = q, b = v; break;
+        case 4: r = t, g = p, b = v; break;
+        case 5: r = v, g = p, b = q; break;
+      }
+      return Color.rgb(r * 255, g * 255, b * 255);
+    },
+
+    lerp: function(t, colorA, colorB) {
+      var ca, cb;
+      if(typeof colorA === "string") {
+        ca = Color.string(colorA);
+      }
+      else if(typeof colorA === "number") {
+        ca = Color.num(colorA);
+      }
+      else if(colorA.isColorObject) {
+        ca = colorA;
+      }
+      if(typeof colorB === "string") {
+        cb = Color.string(colorB);
+      }
+      else if(typeof colorB === "number") {
+        cb = Color.number(colorB);
+      }
+      else if(colorB.isColorObject) {
+        cb = colorB;
+      }
+      var r = Num.lerp(ca.red,   cb.red, t),
+        g = Num.lerp(ca.green, cb.green, t),
+        b = Num.lerp(ca.blue,  cb.blue, t),
+        a = Num.lerp(ca.alpha, cb.alpha, t);
+      return Color.rgba(r, g, b, a);
+    },
+
+    string: function(str) {
+      if(str.charAt(0) === "#" && str.length === 7) {
+        str = "0x" + str.substr(1);
+        var num = parseInt(str, 16);
+        return Color.number(num);
+      }
+      else if(str.charAt(0) === "#" && str.length === 4) {
+        var r = str.charAt(1),
+          g = str.charAt(2),
+          b = str.charAt(3);
+        str = "0x" + r + r + g + g + b + b;
+        var num = parseInt(str, 16);
+        return Color.number(num);
+      }
+      else if(str.indexOf("rgba(") === 0) {
+        var vals = str.substring(5, str.length - 1).split(",");
+        return Color.rgba(
+          parseInt(vals[0], 10),
+          parseInt(vals[1], 10),
+          parseInt(vals[2], 10),
+          parseFloat(vals[3])
+        );
+      }
+      else if(str.indexOf("rgb(") === 0) {
+        var vals = str.substring(4, str.length - 1).split(",");
+        return Color.rgba(
+          parseInt(vals[0], 10),
+          parseInt(vals[1], 10),
+          parseInt(vals[2], 10),
+          1
+        );
+      }
+      else if(Color._colorMap[str]) {
+        return Color.rgba(
+          Color._colorMap[str][0],
+          Color._colorMap[str][1],
+          Color._colorMap[str][2],
+          1
+        );
+      }
+      else {
+        return Color.rgba(0, 0, 0, 1);
+      }
+    },
+
+    _colorMap: {
+      blueviolet: [138,43,226],
+      brown: [165,42,42],
+      aliceblue: [240,248,255],
+      antiquewhite: [250,235,215],
+      aqua: [0,255,255],
+      aquamarine: [127,255,212],
+      azure: [240,255,255],
+      beige: [245,245,220],
+      bisque: [255,228,196],
+      black: [0,0,0],
+      blanchedalmond: [255,235,205],
+      blue: [0,0,255],
+      burlywood: [222,184,135],
+      cadetblue: [95,158,160],
+      chartreuse: [127,255,0],
+      chocolate: [210,105,30],
+      coral: [255,127,80],
+      cornflowerblue: [100,149,237],
+      cornsilk: [255,248,220],
+      crimson: [220,20,60],
+      cyan: [0,255,255],
+      darkblue: [0,0,139],
+      darkcyan: [0,139,139],
+      darkgoldenrod: [184,134,11],
+      darkgray: [169,169,169],
+      darkgreen: [0,100,0],
+      darkgrey: [169,169,169],
+      darkkhaki: [189,183,107],
+      darkmagenta: [139,0,139],
+      darkolivegreen: [85,107,47],
+      darkorange: [255,140,0],
+      darkorchid: [153,50,204],
+      darkred: [139,0,0],
+      darksalmon: [233,150,122],
+      darkseagreen: [143,188,143],
+      darkslateblue: [72,61,139],
+      darkslategray: [47,79,79],
+      darkslategrey: [47,79,79],
+      darkturquoise: [0,206,209],
+      darkviolet: [148,0,211],
+      deeppink: [255,20,147],
+      deepskyblue: [0,191,255],
+      dimgray: [105,105,105],
+      dimgrey: [105,105,105],
+      dodgerblue: [30,144,255],
+      firebrick: [178,34,34],
+      floralwhite: [255,250,240],
+      forestgreen: [34,139,34],
+      fuchsia: [255,0,255],
+      gainsboro: [220,220,220],
+      ghostwhite: [248,248,255],
+      gold: [255,215,0],
+      goldenrod: [218,165,32],
+      gray: [128,128,128],
+      green: [0,128,0],
+      greenyellow: [173,255,47],
+      grey: [128,128,128],
+      honeydew: [240,255,240],
+      hotpink: [255,105,180],
+      indianred: [205,92,92],
+      indigo: [75,0,130],
+      ivory: [255,255,240],
+      khaki: [240,230,140],
+      lavender: [230,230,250],
+      lavenderblush: [255,240,245],
+      lawngreen: [124,252,0],
+      lemonchiffon: [255,250,205],
+      lightblue: [173,216,230],
+      lightcoral: [240,128,128],
+      lightcyan: [224,255,255],
+      lightgoldenrodyellow: [250,250,210],
+      lightgray: [211,211,211],
+      lightgreen: [144,238,144],
+      lightgrey: [211,211,211],
+      lightpink: [255,182,193],
+      lightsalmon: [255,160,122],
+      lightseagreen: [32,178,170],
+      lightskyblue: [135,206,250],
+      lightslategray: [119,136,153],
+      lightslategrey: [119,136,153],
+      lightsteelblue: [176,196,222],
+      lightyellow: [255,255,224],
+      lime: [0,255,0],
+      limegreen: [50,205,50],
+      linen: [250,240,230],
+      magenta: [255,0,255],
+      maroon: [128,0,0],
+      mediumaquamarine: [102,205,170],
+      mediumblue: [0,0,205],
+      mediumorchid: [186,85,211],
+      mediumpurple: [147,112,219],
+      mediumseagreen: [60,179,113],
+      mediumslateblue: [123,104,238],
+      mediumspringgreen: [0,250,154],
+      mediumturquoise: [72,209,204],
+      mediumvioletred: [199,21,133],
+      midnightblue: [25,25,112],
+      mintcream: [245,255,250],
+      mistyrose: [255,228,225],
+      moccasin: [255,228,181],
+      navajowhite: [255,222,173],
+      navy: [0,0,128],
+      oldlace: [253,245,230],
+      olive: [128,128,0],
+      olivedrab: [107,142,35],
+      orange: [255,165,0],
+      orangered: [255,69,0],
+      orchid: [218,112,214],
+      palegoldenrod: [238,232,170],
+      palegreen: [152,251,152],
+      paleturquoise: [175,238,238],
+      palevioletred: [219,112,147],
+      papayawhip: [255,239,213],
+      peachpuff: [255,218,185],
+      peru: [205,133,63],
+      pink: [255,192,203],
+      plum: [221,160,221],
+      powderblue: [176,224,230],
+      purple: [128,0,128],
+      rebeccapurple: [102,51,153],
+      red: [255,0,0],
+      rosybrown: [188,143,143],
+      royalblue: [65,105,225],
+      saddlebrown: [139,69,19],
+      salmon: [250,128,114],
+      sandybrown: [244,164,96],
+      seagreen: [46,139,87],
+      seashell: [255,245,238],
+      sienna: [160,82,45],
+      silver: [192,192,192],
+      skyblue: [135,206,235],
+      slateblue: [106,90,205],
+      slategray: [112,128,144],
+      slategrey: [112,128,144],
+      snow: [255,250,250],
+      springgreen: [0,255,127],
+      steelblue: [70,130,180],
+      tan: [210,180,140],
+      teal: [0,128,128],
+      thistle: [216,191,216],
+      tomato: [255,99,71],
+      turquoise: [64,224,208],
+      violet: [238,130,238],
+      wheat: [245,222,179],
+      white: [255,255,255],
+      whitesmoke: [245,245,245],
+      yellow: [255,255,0],
+      yellowgreen: [154,205,50]
+    },
+  };
+
   const ContextMethods = {
     setShadow: function(color, offsetX, offsetY, blur) {
       this.shadowColor = color;
@@ -353,7 +1004,7 @@ var bljs = (function (exports) {
     clearRGB: function(r, g, b) {
       this.save();
       this.setTransform(1, 0, 0, 1, 0, 0);
-      this.fillStyle = "#" + (r << 16 | g << 8 | b).toString(16);
+      this.fillStyle = `rgb(${r}, ${g}, ${b})`;
       this.fillRect(0, 0, this.canvas.width, this.canvas.height);
       this.restore();
     },
@@ -371,7 +1022,27 @@ var bljs = (function (exports) {
     },
 
     clearColor(color) {
-      this.clearRGB(color.red, color.green, color.blue);
+      this.save();
+      this.setTransform(1, 0, 0, 1, 0, 0);
+      this.fillStyle = color.toString();
+      this.fillRect(0, 0, this.canvas.width, this.canvas.height);
+      this.restore();
+    },
+
+    setFillRGB: function(r, g, b) {
+      this.fillStyle = Color.rgb(r, g, b).toString();
+    },
+
+    setFillHSV: function(h, s, v) {
+      this.fillStyle = Color.hsv(h, s, v).toString();
+    },
+
+    setStrokeRGB: function(r, g, b) {
+      this.strokeStyle = Color.rgb(r, g, b).toString();
+    },
+
+    setStrokeHSV: function(h, s, v) {
+      this.strokeStyle = Color.hsv(h, s, v).toString();
     },
 
     getPixel: function(x, y) {
@@ -388,9 +1059,10 @@ var bljs = (function (exports) {
 
   class Canvas {
     constructor(parent, w, h) {
-      this.width = w || 100;
-      this.height = h || 100;
+      this.width = w || window.innerWidth;
+      this.height = h || window.innerHeight;
       this.canvas = document.createElement("canvas");
+      this.canvas.style.display = "block";
       parent && parent.appendChild(this.canvas);
       this.canvas.width = this.width;
       this.canvas.height = this.height;
@@ -410,559 +1082,6 @@ var bljs = (function (exports) {
     }
   }
 
-  const Random = {
-    _seed: Date.now(),
-    _a: 1664525,
-    _c: 1013904223,
-    _m: Math.pow(2, 32),
-
-    seed: function(seed) {
-      Random._seed = seed;
-    },
-
-    _int: function() {
-      // range [0, 2^32)
-      Random._seed = (Random._seed * Random._a + Random._c) % Random._m;
-      return Random._seed;
-    },
-
-    _float: function() {
-      // range [0, 1)
-      return Random._int() / Random._m;
-    },
-
-    bool: function(percent) {
-      // percent is chance of getting true
-      if(percent == null) {
-        percent = 0.5;
-      }
-      return Random._float() < percent;
-    },
-
-    float: function(min, max) {
-      // range [min, max)
-      if(arguments.length === 1) {
-        return Random._float() * min;
-      }
-      if(arguments.length === 2) {
-        return min + Random._float() * (max - min);
-      }
-      return Random._float();
-    },
-
-    int: function(min, max) {
-      // range [min, max)
-      if(arguments.length === 1) {
-        return Math.floor(Random._float() * min);
-      }
-      if(arguments.length === 2) {
-        return Math.floor(Random.float(min, max));
-      }
-      return Random._int();
-    },
-
-    point: function(x, y, w, h) {
-      const xx = Random.float(x, x + w);
-      const yy = Random.float(y, y + h);
-      return { x: xx, y: yy };
-    },
-
-    circle: function(x, y, w, h, rMin, rMax) {
-      const xx = Random.float(x, x + w);
-      const yy = Random.float(y, y + h);
-      const r = Random.float(rMin, rMax);
-      return { x: xx, y: yy, r: r };
-    },
-
-    power: function(min, max, power) {
-      if(arguments.length === 2) {
-        power = max;
-        max = min;
-        min = 0;
-      }
-      return min + Math.pow(Random.float(1), power) * (max - min);
-    },
-
-    powerInt: function(min, max, power) {
-      return Math.floor(Random.power(min, max, power));
-    },
-
-    gauss: function(min, max, g) {
-      if(arguments.length === 2) {
-        g = max;
-        max = min;
-        min = 0;
-      }
-      var total = 0;
-      for(var i = 0; i < g; i++) {
-        total += Random.float(min, max);
-      }
-      return total / g;
-    },
-
-    chooser: function() {
-      return {
-        choices: [],
-        total: 0,
-
-        addChoice: function (choice, weight) {
-          if (weight == null) weight = 1;
-
-          this.choices.push({
-            weight: weight,
-            choice: choice
-          });
-          this.total += weight;
-          return this;
-        },
-
-        getChoice: function () {
-          var rand = Random.float(0, this.total);
-          for (var i = 0; i < this.choices.length; i++) {
-            var choice = this.choices[i];
-            if (rand < choice.weight) {
-              return choice.choice;
-            }
-            rand -= choice.weight;
-          }
-        }
-      }
-    }
-  };
-
-  const Num = {
-      norm: function (value, min, max) {
-          return (value - min) / (max - min);
-      },
-
-      lerp: function (min, max, t) {
-          return min + (max - min) * t;
-      },
-
-      map: function (srcValue, srcMin, srcMax, dstMin, dstMax) {
-          var norm = this.norm(srcValue, srcMin, srcMax);
-          return this.lerp(dstMin, dstMax, norm);
-      },
-
-      clamp: function (value, min, max) {
-          return Math.min(Math.max(value, min), max);
-      },
-
-      dotProduct: function(x0, y0, x1, y1, x2, y2, x3, y3) {
-          var dx0 = x1 - x0,
-              dy0 = y1 - y0,
-              dx1 = x3 - x2,
-              dy1 = y3 - y2;
-          return dx0 * dx1 + dy0 * dy1;
-      },
-
-      angleBetween: function(x0, y0, x1, y1, x2, y2, x3, y3) {
-          var dp = this.dotProduct(x0, y0, x1, y1, x2, y2, x3, y3),
-              mag0 = this.dist(x0, y0, x1, y1),
-              mag1 = this.dist(x2, y2, x3, y3);
-          return Math.acos(dp / mag0 / mag1);
-      },
-
-      polarToPoint: function (angle, radius) {
-          return {
-              x: Math.cos(angle) * radius,
-              y: Math.sin(angle) * radius
-          };
-      },
-
-      pointToPolar: function(p) {
-          return {
-              angle: Math.atan2(p.y, p.x),
-              radius: this.magnitude(p)
-          };
-      },
-
-      magnitude: function(p) {
-          return this.dist(0, 0, p.x, p.y);
-      },
-
-      dist: function (x0, y0, x1, y1) {
-          if(arguments.length === 2) {
-              return this.dist(x0.x, x0.y, y0.x, y0.y);
-          }
-          var dx = x1 - x0,
-              dy = y1 - y0;
-          return Math.sqrt(dx * dx + dy * dy);
-      },
-
-      lerpPoint: function(p0, p1, t) {
-          return {
-              x: this.lerp(p0.x, p1.x, t),
-              y: this.lerp(p0.y, p1.y, t)
-          };
-      },
-
-      bezier: function(p0, p1, p2, p3, t) {
-          var oneMinusT = 1 - t,
-              m0 = oneMinusT * oneMinusT * oneMinusT,
-              m1 = 3 * oneMinusT * oneMinusT * t,
-              m2 = 3 * oneMinusT * t * t,
-              m3 = t * t * t;
-          return {
-              x: m0 * p0.x + m1 * p1.x + m2 * p2.x + m3 * p3.x,
-              y: m0 * p0.y + m1 * p1.y + m2 * p2.y + m3 * p3.y
-          };
-      },
-
-      quadratic: function(p0, p1, p2, t) {
-          var oneMinusT = 1 - t,
-              m0 = oneMinusT * oneMinusT,
-              m1 = 2 * oneMinusT * t,
-              m2 = t * t;
-          return {
-              x: m0 * p0.x + m1 * p1.x + m2 * p2.x,
-              y: m0 * p0.y + m1 * p1.y + m2 * p2.y
-          }
-
-      },
-
-      pointInCircle: function(px, py, cx, cy, cr) {
-          var dist = this.dist(px, py, cx, cy);
-          return dist <= cr;
-      },
-
-      pointInRect: function(px, py, rx, ry, rw, rh) {
-          return px >= rx &&
-              py >= ry &&
-              px <= rx + rw &&
-              py <= ry + rh;
-      },
-
-      segmentIntersect: function(p0, p1, p2, p3) {
-          var A1 = p1.y - p0.y,
-              B1 = p0.x - p1.x,
-              C1 = A1 * p0.x + B1 * p0.y,
-              A2 = p3.y - p2.y,
-              B2 = p2.x - p3.x,
-              C2 = A2 * p2.x + B2 * p2.y,
-              denominator = A1 * B2 - A2 * B1;
-
-          if (denominator == 0) {
-              return null;
-          }
-
-          var intersectX = (B2 * C1 - B1 * C2) / denominator,
-              intersectY = (A1 * C2 - A2 * C1) / denominator,
-              rx0 = (intersectX - p0.x) / (p1.x - p0.x),
-              ry0 = (intersectY - p0.y) / (p1.y - p0.y),
-              rx1 = (intersectX - p2.x) / (p3.x - p2.x),
-              ry1 = (intersectY - p2.y) / (p3.y - p2.y);
-
-          if (((rx0 >= 0 && rx0 <= 1) || (ry0 >= 0 && ry0 <= 1)) &&
-              ((rx1 >= 0 && rx1 <= 1) || (ry1 >= 0 && ry1 <= 1))) {
-              return {
-                  x: intersectX,
-                  y: intersectY
-              };
-          }
-          else {
-              return null;
-          }
-      },
-
-      tangentPointToCircle: function(x, y, cx, cy, cr, anticlockwise) {
-          var dist = Math.dist(x, y, cx, cy),
-              dir = anticlockwise ? 1 : -1,
-              angle = Math.acos(-cr / dist) * dir,
-              baseAngle = Math.atan2(cy - y, cx - x),
-              totalAngle = baseAngle + angle;
-
-          return {
-              x: cx + Math.cos(totalAngle) * cr,
-              y: cy + Math.sin(totalAngle) * cr
-          };
-      }
-  };
-
-  const Color = {
-    rgb: function(r, g, b) {
-      return Color.rgba(r, g, b, 1);
-    },
-
-    rgba: function(r, g, b, a) {
-      return {
-        red: Math.floor(r),
-        green: Math.floor(g),
-        blue: Math.floor(b),
-        alpha: Math.floor(a),
-        toString: function() {
-          return `rgba(${this.red}, ${this.green}, ${this.blue}, ${this.alpha})`;
-        },
-      };
-    },
-    
-    rgbf: function(r, g, b) {
-      return Color.rgbaf(r, g, b, 1);
-    },
-    
-    rgbaf: function(r, g, b, a) {
-      return Color.rgb(r * 255, g * 255, b * 255, a);
-    },
-
-    number: function(num) {
-      return Color.rgb(num >> 16, num >> 8 & 0xff, num & 0xff);
-    },
-
-    randomRGB: function() {
-      return Color.number(Math.floor(Random.int(0xffffff)));
-    },
-
-    gray: function(shade) {
-      return Color.rgb(shade, shade, shade);
-    },
-
-    randomGray: function() {
-      return Color.gray(Random.int(255));
-    },
-
-    hsv: function(h, s, v) {
-      h /= 360;
-      var r, g, b,
-        i = Math.floor(h * 6),
-        f = h * 6 - i,
-        p = v * (1 - s),
-        q = v * (1 - f * s),
-        t = v * (1 - (1 - f) * s);
-      switch (i % 6) {
-        case 0: r = v, g = t, b = p; break;
-        case 1: r = q, g = v, b = p; break;
-        case 2: r = p, g = v, b = t; break;
-        case 3: r = p, g = q, b = v; break;
-        case 4: r = t, g = p, b = v; break;
-        case 5: r = v, g = p, b = q; break;
-      }
-      return Color.rgb(r * 255, g * 255, b * 255);
-    },
-
-    lerp: function(t, colorA, colorB) {
-      var ca, cb;
-      if(typeof colorA === "string") {
-        ca = Color.string(colorA);
-      }
-      else if(typeof colorA === "number") {
-        ca = Color.num(colorA);
-      }
-      else if(colorA.isColorObject) {
-        ca = colorA;
-      }
-      if(typeof colorB === "string") {
-        cb = Color.string(colorB);
-      }
-      else if(typeof colorB === "number") {
-        cb = Color.number(colorB);
-      }
-      else if(colorB.isColorObject) {
-        cb = colorB;
-      }
-      var r = Num.lerp(ca.red,   cb.red, t),
-        g = Num.lerp(ca.green, cb.green, t),
-        b = Num.lerp(ca.blue,  cb.blue, t),
-        a = Num.lerp(ca.alpha, cb.alpha, t);
-      return Color.rgba(r, g, b, a);
-    },
-
-    string: function(str) {
-      if(str.charAt(0) === "#" && str.length === 7) {
-        str = "0x" + str.substr(1);
-        var num = parseInt(str, 16);
-        return Color.number(num);
-      }
-      else if(str.charAt(0) === "#" && str.length === 4) {
-        var r = str.charAt(1),
-          g = str.charAt(2),
-          b = str.charAt(3);
-        str = "0x" + r + r + g + g + b + b;
-        var num = parseInt(str, 16);
-        return Color.number(num);
-      }
-      else if(str.indexOf("rgba(") === 0) {
-        var vals = str.substring(5, str.length - 1).split(",");
-        return Color.rgba(
-          parseInt(vals[0], 10),
-          parseInt(vals[1], 10),
-          parseInt(vals[2], 10),
-          parseFloat(vals[3])
-        );
-      }
-      else if(str.indexOf("rgb(") === 0) {
-        var vals = str.substring(4, str.length - 1).split(",");
-        return Color.rgba(
-          parseInt(vals[0], 10),
-          parseInt(vals[1], 10),
-          parseInt(vals[2], 10),
-          1
-        );
-      }
-      else if(Color._colorMap[str]) {
-        return Color.rgba(
-          Color._colorMap[str][0],
-          Color._colorMap[str][1],
-          Color._colorMap[str][2],
-          1
-        );
-      }
-      else {
-        return Color.rgba(0, 0, 0, 1);
-      }
-    },
-
-    _colorMap: {
-      blueviolet: [138,43,226],
-      brown: [165,42,42],
-      aliceblue: [240,248,255],
-      antiquewhite: [250,235,215],
-      aqua: [0,255,255],
-      aquamarine: [127,255,212],
-      azure: [240,255,255],
-      beige: [245,245,220],
-      bisque: [255,228,196],
-      black: [0,0,0],
-      blanchedalmond: [255,235,205],
-      blue: [0,0,255],
-      burlywood: [222,184,135],
-      cadetblue: [95,158,160],
-      chartreuse: [127,255,0],
-      chocolate: [210,105,30],
-      coral: [255,127,80],
-      cornflowerblue: [100,149,237],
-      cornsilk: [255,248,220],
-      crimson: [220,20,60],
-      cyan: [0,255,255],
-      darkblue: [0,0,139],
-      darkcyan: [0,139,139],
-      darkgoldenrod: [184,134,11],
-      darkgray: [169,169,169],
-      darkgreen: [0,100,0],
-      darkgrey: [169,169,169],
-      darkkhaki: [189,183,107],
-      darkmagenta: [139,0,139],
-      darkolivegreen: [85,107,47],
-      darkorange: [255,140,0],
-      darkorchid: [153,50,204],
-      darkred: [139,0,0],
-      darksalmon: [233,150,122],
-      darkseagreen: [143,188,143],
-      darkslateblue: [72,61,139],
-      darkslategray: [47,79,79],
-      darkslategrey: [47,79,79],
-      darkturquoise: [0,206,209],
-      darkviolet: [148,0,211],
-      deeppink: [255,20,147],
-      deepskyblue: [0,191,255],
-      dimgray: [105,105,105],
-      dimgrey: [105,105,105],
-      dodgerblue: [30,144,255],
-      firebrick: [178,34,34],
-      floralwhite: [255,250,240],
-      forestgreen: [34,139,34],
-      fuchsia: [255,0,255],
-      gainsboro: [220,220,220],
-      ghostwhite: [248,248,255],
-      gold: [255,215,0],
-      goldenrod: [218,165,32],
-      gray: [128,128,128],
-      green: [0,128,0],
-      greenyellow: [173,255,47],
-      grey: [128,128,128],
-      honeydew: [240,255,240],
-      hotpink: [255,105,180],
-      indianred: [205,92,92],
-      indigo: [75,0,130],
-      ivory: [255,255,240],
-      khaki: [240,230,140],
-      lavender: [230,230,250],
-      lavenderblush: [255,240,245],
-      lawngreen: [124,252,0],
-      lemonchiffon: [255,250,205],
-      lightblue: [173,216,230],
-      lightcoral: [240,128,128],
-      lightcyan: [224,255,255],
-      lightgoldenrodyellow: [250,250,210],
-      lightgray: [211,211,211],
-      lightgreen: [144,238,144],
-      lightgrey: [211,211,211],
-      lightpink: [255,182,193],
-      lightsalmon: [255,160,122],
-      lightseagreen: [32,178,170],
-      lightskyblue: [135,206,250],
-      lightslategray: [119,136,153],
-      lightslategrey: [119,136,153],
-      lightsteelblue: [176,196,222],
-      lightyellow: [255,255,224],
-      lime: [0,255,0],
-      limegreen: [50,205,50],
-      linen: [250,240,230],
-      magenta: [255,0,255],
-      maroon: [128,0,0],
-      mediumaquamarine: [102,205,170],
-      mediumblue: [0,0,205],
-      mediumorchid: [186,85,211],
-      mediumpurple: [147,112,219],
-      mediumseagreen: [60,179,113],
-      mediumslateblue: [123,104,238],
-      mediumspringgreen: [0,250,154],
-      mediumturquoise: [72,209,204],
-      mediumvioletred: [199,21,133],
-      midnightblue: [25,25,112],
-      mintcream: [245,255,250],
-      mistyrose: [255,228,225],
-      moccasin: [255,228,181],
-      navajowhite: [255,222,173],
-      navy: [0,0,128],
-      oldlace: [253,245,230],
-      olive: [128,128,0],
-      olivedrab: [107,142,35],
-      orange: [255,165,0],
-      orangered: [255,69,0],
-      orchid: [218,112,214],
-      palegoldenrod: [238,232,170],
-      palegreen: [152,251,152],
-      paleturquoise: [175,238,238],
-      palevioletred: [219,112,147],
-      papayawhip: [255,239,213],
-      peachpuff: [255,218,185],
-      peru: [205,133,63],
-      pink: [255,192,203],
-      plum: [221,160,221],
-      powderblue: [176,224,230],
-      purple: [128,0,128],
-      rebeccapurple: [102,51,153],
-      red: [255,0,0],
-      rosybrown: [188,143,143],
-      royalblue: [65,105,225],
-      saddlebrown: [139,69,19],
-      salmon: [250,128,114],
-      sandybrown: [244,164,96],
-      seagreen: [46,139,87],
-      seashell: [255,245,238],
-      sienna: [160,82,45],
-      silver: [192,192,192],
-      skyblue: [135,206,235],
-      slateblue: [106,90,205],
-      slategray: [112,128,144],
-      slategrey: [112,128,144],
-      snow: [255,250,250],
-      springgreen: [0,255,127],
-      steelblue: [70,130,180],
-      tan: [210,180,140],
-      teal: [0,128,128],
-      thistle: [216,191,216],
-      tomato: [255,99,71],
-      turquoise: [64,224,208],
-      violet: [238,130,238],
-      wheat: [245,222,179],
-      white: [255,255,255],
-      whitesmoke: [245,245,245],
-      yellow: [255,255,0],
-      yellowgreen: [154,205,50]
-    },
-  };
-
   const Utils = {
     fillArray: function(count, func, ...args) {
       const result = [];
@@ -973,6 +1092,7 @@ var bljs = (function (exports) {
     },
   };
 
+  exports.Anim = Anim;
   exports.Canvas = Canvas;
   exports.Color = Color;
   exports.ContextMethods = ContextMethods;

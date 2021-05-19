@@ -1,3 +1,5 @@
+import { Color } from "./color.js";
+
 export const ContextMethods = {
   setShadow: function(color, offsetX, offsetY, blur) {
     this.shadowColor = color;
@@ -350,7 +352,7 @@ export const ContextMethods = {
   clearRGB: function(r, g, b) {
     this.save();
     this.setTransform(1, 0, 0, 1, 0, 0);
-    this.fillStyle = "#" + (r << 16 | g << 8 | b).toString(16);
+    this.fillStyle = `rgb(${r}, ${g}, ${b})`;
     this.fillRect(0, 0, this.canvas.width, this.canvas.height);
     this.restore();
   },
@@ -368,7 +370,27 @@ export const ContextMethods = {
   },
 
   clearColor(color) {
-    this.clearRGB(color.red, color.green, color.blue);
+    this.save();
+    this.setTransform(1, 0, 0, 1, 0, 0);
+    this.fillStyle = color.toString();
+    this.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    this.restore();
+  },
+
+  setFillRGB: function(r, g, b) {
+    this.fillStyle = Color.rgb(r, g, b).toString();
+  },
+
+  setFillHSV: function(h, s, v) {
+    this.fillStyle = Color.hsv(h, s, v).toString();
+  },
+
+  setStrokeRGB: function(r, g, b) {
+    this.strokeStyle = Color.rgb(r, g, b).toString();
+  },
+
+  setStrokeHSV: function(h, s, v) {
+    this.strokeStyle = Color.hsv(h, s, v).toString();
   },
 
   getPixel: function(x, y) {

@@ -2,9 +2,10 @@ import { ContextMethods } from "./contextmethods";
 
 export class Canvas {
   constructor(parent, w, h) {
-    this.width = w || 100;
-    this.height = h || 100;
+    this.width = w || window.innerWidth;
+    this.height = h || window.innerHeight;
     this.canvas = document.createElement("canvas");
+    this.canvas.style.display = "block";
     parent && parent.appendChild(this.canvas);
     this.canvas.width = this.width;
     this.canvas.height = this.height;
