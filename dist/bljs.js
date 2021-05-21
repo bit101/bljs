@@ -652,7 +652,13 @@ var bljs = (function (exports) {
     },
   };
 
-  const ContextMethods = {
+  const Context = {
+    extendContext: function(context) {
+      for(let method in Context) {
+        context[method] = Context[method];
+      }
+    },
+
     setShadow: function(color, offsetX, offsetY, blur) {
       this.shadowColor = color;
       this.shadowOffsetX = offsetX;
@@ -1067,13 +1073,7 @@ var bljs = (function (exports) {
       this.canvas.width = this.width;
       this.canvas.height = this.height;
       this.context = this.canvas.getContext("2d");
-      this.init();
-    }
-
-    init() {
-      for(let method in ContextMethods) {
-        this.context[method] = ContextMethods[method];
-      }
+      Context.extendContext(this.context);
     }
 
     setSize(w, h) {
@@ -1219,12 +1219,13 @@ var bljs = (function (exports) {
       }
       return result;
     },
+
   };
 
   exports.Anim = Anim;
   exports.Canvas = Canvas;
   exports.Color = Color;
-  exports.ContextMethods = ContextMethods;
+  exports.Context = Context;
   exports.Noise = Noise;
   exports.Num = Num;
   exports.Random = Random;

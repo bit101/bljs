@@ -649,7 +649,13 @@ const Color = {
   },
 };
 
-const ContextMethods = {
+const Context = {
+  extendContext: function(context) {
+    for(let method in Context) {
+      context[method] = Context[method];
+    }
+  },
+
   setShadow: function(color, offsetX, offsetY, blur) {
     this.shadowColor = color;
     this.shadowOffsetX = offsetX;
@@ -1064,13 +1070,7 @@ class Canvas {
     this.canvas.width = this.width;
     this.canvas.height = this.height;
     this.context = this.canvas.getContext("2d");
-    this.init();
-  }
-
-  init() {
-    for(let method in ContextMethods) {
-      this.context[method] = ContextMethods[method];
-    }
+    Context.extendContext(this.context);
   }
 
   setSize(w, h) {
@@ -1216,6 +1216,7 @@ const Utils = {
     }
     return result;
   },
+
 };
 
-export { Anim, Canvas, Color, ContextMethods, Noise, Num, Random, Utils };
+export { Anim, Canvas, Color, Context, Noise, Num, Random, Utils };

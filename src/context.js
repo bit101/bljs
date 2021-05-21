@@ -1,6 +1,12 @@
 import { Color } from "./color.js";
 
-export const ContextMethods = {
+export const Context = {
+  extendContext: function(context) {
+    for(let method in Context) {
+      context[method] = Context[method];
+    }
+  },
+
   setShadow: function(color, offsetX, offsetY, blur) {
     this.shadowColor = color;
     this.shadowOffsetX = offsetX;

@@ -1,4 +1,4 @@
-import { ContextMethods } from "./contextmethods";
+import { Context} from "./context.js";
 
 export class Canvas {
   constructor(parent, w, h) {
@@ -10,13 +10,7 @@ export class Canvas {
     this.canvas.width = this.width;
     this.canvas.height = this.height;
     this.context = this.canvas.getContext("2d");
-    this.init();
-  }
-
-  init() {
-    for(let method in ContextMethods) {
-      this.context[method] = ContextMethods[method];
-    }
+    Context.extendContext(this.context);
   }
 
   setSize(w, h) {
@@ -24,4 +18,3 @@ export class Canvas {
     this.canvas.height = this.height = h;
   }
 }
-
