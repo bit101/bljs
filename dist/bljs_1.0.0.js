@@ -769,21 +769,24 @@ var bljs = (function (exports) {
       this.stroke();
     },
 
-    path: function(points) {
+    path: function(points, close) {
       points.forEach(p => {
         this.lineTo(p.x, p.y);
       });
+      if (close) {
+        this.closePath();
+      }
     },
 
-    fillPath: function(points) {
+    fillPath: function(points, close) {
       this.beginPath();
-      this.path(points);
+      this.path(points, close);
       this.fill();
     },
 
-    strokePath: function(points) {
+    strokePath: function(points, close) {
       this.beginPath();
-      this.path(points);
+      this.path(points, close);
       this.stroke();
     },
 
@@ -1222,6 +1225,8 @@ var bljs = (function (exports) {
 
   };
 
+  const version = "1.0.0";
+
   exports.Anim = Anim;
   exports.Canvas = Canvas;
   exports.Color = Color;
@@ -1230,6 +1235,7 @@ var bljs = (function (exports) {
   exports.Num = Num;
   exports.Random = Random;
   exports.Utils = Utils;
+  exports.version = version;
 
   Object.defineProperty(exports, '__esModule', { value: true });
 

@@ -766,21 +766,24 @@ const Context = {
     this.stroke();
   },
 
-  path: function(points) {
+  path: function(points, close) {
     points.forEach(p => {
       this.lineTo(p.x, p.y);
     });
+    if (close) {
+      this.closePath();
+    }
   },
 
-  fillPath: function(points) {
+  fillPath: function(points, close) {
     this.beginPath();
-    this.path(points);
+    this.path(points, close);
     this.fill();
   },
 
-  strokePath: function(points) {
+  strokePath: function(points, close) {
     this.beginPath();
-    this.path(points);
+    this.path(points, close);
     this.stroke();
   },
 
@@ -1219,4 +1222,6 @@ const Utils = {
 
 };
 
-export { Anim, Canvas, Color, Context, Noise, Num, Random, Utils };
+const version = "1.0.0";
+
+export { Anim, Canvas, Color, Context, Noise, Num, Random, Utils, version };
