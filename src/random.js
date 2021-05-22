@@ -98,7 +98,7 @@ export const Random = {
 
         this.choices.push({
           weight: weight,
-          choice: choice
+          choice: choice,
         });
         this.total += weight;
         return this;
@@ -113,8 +113,8 @@ export const Random = {
           }
           rand -= choice.weight;
         }
-      }
+      },
     }
-  }
+  },
 };
 

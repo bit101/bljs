@@ -44,6 +44,6 @@ export function Anim(renderCallback, fps) {
           });
         }, 1000 / this.fps);
       }
-    }
+    },
   };
 }

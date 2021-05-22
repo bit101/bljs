@@ -68,14 +68,14 @@ export const Num = {
   polarToPoint: function (angle, radius) {
     return {
       x: Math.cos(angle) * radius,
-      y: Math.sin(angle) * radius
+      y: Math.sin(angle) * radius,
     };
   },
 
   pointToPolar: function(p) {
     return {
       angle: Math.atan2(p.y, p.x),
-      radius: this.magnitude(p)
+      radius: this.magnitude(p),
     };
   },
 
@@ -95,7 +95,7 @@ export const Num = {
   lerpPoint: function(p0, p1, t) {
     return {
       x: this.lerp(p0.x, p1.x, t),
-      y: this.lerp(p0.y, p1.y, t)
+      y: this.lerp(p0.y, p1.y, t),
     };
   },
 
@@ -107,7 +107,7 @@ export const Num = {
       m3 = t * t * t;
     return {
       x: m0 * p0.x + m1 * p1.x + m2 * p2.x + m3 * p3.x,
-      y: m0 * p0.y + m1 * p1.y + m2 * p2.y + m3 * p3.y
+      y: m0 * p0.y + m1 * p1.y + m2 * p2.y + m3 * p3.y,
     };
   },
 
@@ -118,7 +118,7 @@ export const Num = {
       m2 = t * t;
     return {
       x: m0 * p0.x + m1 * p1.x + m2 * p2.x,
-      y: m0 * p0.y + m1 * p1.y + m2 * p2.y
+      y: m0 * p0.y + m1 * p1.y + m2 * p2.y,
     }
 
   },
@@ -159,7 +159,7 @@ export const Num = {
       ((rx1 >= 0 && rx1 <= 1) || (ry1 >= 0 && ry1 <= 1))) {
       return {
         x: intersectX,
-        y: intersectY
+        y: intersectY,
       };
     }
     else {
@@ -176,7 +176,7 @@ export const Num = {
 
     return {
       x: cx + Math.cos(totalAngle) * cr,
-      y: cy + Math.sin(totalAngle) * cr
+      y: cy + Math.sin(totalAngle) * cr,
     };
   },
 

@@ -261,7 +261,7 @@ export const Context = {
     this.moveTo(points[0].x, points[0].y);
     this.lineTo(
       (points[0].x + points[1].x) / 2,
-      (points[0].y + points[1].y) / 2,
+      (points[0].y + points[1].y) / 2
     );
     for (let i = 1; i < points.length - 1; i++) {
       let p0 = points[i];
