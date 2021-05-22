@@ -30,7 +30,7 @@ export function Anim(renderCallback, fps) {
     },
 
     render: function () {
-      if(this.shouldKill) {
+      if (this.shouldKill) {
         this.shouldKill = false;
         this.running = false;
       }

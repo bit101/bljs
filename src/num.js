@@ -84,7 +84,7 @@ export const Num = {
   },
 
   dist: function (x0, y0, x1, y1) {
-    if(arguments.length === 2) {
+    if (arguments.length === 2) {
       return this.dist(x0.x, x0.y, y0.x, y0.y);
     }
     var dx = x1 - x0,
@@ -119,7 +119,7 @@ export const Num = {
     return {
       x: m0 * p0.x + m1 * p1.x + m2 * p2.x,
       y: m0 * p0.y + m1 * p1.y + m2 * p2.y,
-    }
+    };
 
   },
 

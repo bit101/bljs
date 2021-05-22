@@ -2,7 +2,7 @@ import { Color } from "./color.js";
 
 export const Context = {
   extendContext: function(context) {
-    for(let method in Context) {
+    for (let method in Context) {
       context[method] = Context[method];
     }
   },
@@ -412,5 +412,5 @@ export const Context = {
   },
 
 
-}
+};
 

@@ -1,5 +1,5 @@
-import { Random } from "./random.js";
 import { Num } from "./num.js";
+import { Random } from "./random.js";
 
 export const Color = {
   rgb: function(r, g, b) {
@@ -51,34 +51,34 @@ export const Color = {
       q = v * (1 - f * s),
       t = v * (1 - (1 - f) * s);
     switch (i % 6) {
-      case 0: r = v, g = t, b = p; break;
-      case 1: r = q, g = v, b = p; break;
-      case 2: r = p, g = v, b = t; break;
-      case 3: r = p, g = q, b = v; break;
-      case 4: r = t, g = p, b = v; break;
-      case 5: r = v, g = p, b = q; break;
+    case 0: r = v, g = t, b = p; break;
+    case 1: r = q, g = v, b = p; break;
+    case 2: r = p, g = v, b = t; break;
+    case 3: r = p, g = q, b = v; break;
+    case 4: r = t, g = p, b = v; break;
+    case 5: r = v, g = p, b = q; break;
     }
     return Color.rgb(r * 255, g * 255, b * 255);
   },
 
   lerp: function(t, colorA, colorB) {
     var ca, cb;
-    if(typeof colorA === "string") {
+    if (typeof colorA === "string") {
       ca = Color.string(colorA);
     }
-    else if(typeof colorA === "number") {
+    else if (typeof colorA === "number") {
       ca = Color.num(colorA);
     }
-    else if(colorA.isColorObject) {
+    else if (colorA.isColorObject) {
       ca = colorA;
     }
-    if(typeof colorB === "string") {
+    if (typeof colorB === "string") {
       cb = Color.string(colorB);
     }
-    else if(typeof colorB === "number") {
+    else if (typeof colorB === "number") {
       cb = Color.number(colorB);
     }
-    else if(colorB.isColorObject) {
+    else if (colorB.isColorObject) {
       cb = colorB;
     }
     var r = Num.lerp(ca.red,   cb.red, t),
@@ -89,12 +89,12 @@ export const Color = {
   },
 
   string: function(str) {
-    if(str.charAt(0) === "#" && str.length === 7) {
+    if (str.charAt(0) === "#" && str.length === 7) {
       str = "0x" + str.substr(1);
       var num = parseInt(str, 16);
       return Color.number(num);
     }
-    else if(str.charAt(0) === "#" && str.length === 4) {
+    else if (str.charAt(0) === "#" && str.length === 4) {
       var r = str.charAt(1),
         g = str.charAt(2),
         b = str.charAt(3);
@@ -102,7 +102,7 @@ export const Color = {
       var num = parseInt(str, 16);
       return Color.number(num);
     }
-    else if(str.indexOf("rgba(") === 0) {
+    else if (str.indexOf("rgba(") === 0) {
       var vals = str.substring(5, str.length - 1).split(",");
       return Color.rgba(
         parseInt(vals[0], 10),
@@ -111,7 +111,7 @@ export const Color = {
         parseFloat(vals[3])
       );
     }
-    else if(str.indexOf("rgb(") === 0) {
+    else if (str.indexOf("rgb(") === 0) {
       var vals = str.substring(4, str.length - 1).split(",");
       return Color.rgba(
         parseInt(vals[0], 10),
@@ -120,7 +120,7 @@ export const Color = {
         1
       );
     }
-    else if(Color._colorMap[str]) {
+    else if (Color._colorMap[str]) {
       return Color.rgba(
         Color._colorMap[str][0],
         Color._colorMap[str][1],
@@ -283,5 +283,5 @@ export const Color = {
     yellow: [255,255,0],
     yellowgreen: [154,205,50],
   },
-}
+};
 

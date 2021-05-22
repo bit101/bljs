@@ -21,7 +21,7 @@ export const Random = {
 
   bool: function(percent) {
     // percent is chance of getting true
-    if(percent == null) {
+    if (percent == null) {
       percent = 0.5;
     }
     return Random._float() < percent;
@@ -29,10 +29,10 @@ export const Random = {
 
   float: function(min, max) {
     // range [min, max)
-    if(arguments.length === 1) {
+    if (arguments.length === 1) {
       return Random._float() * min;
     }
-    if(arguments.length === 2) {
+    if (arguments.length === 2) {
       return min + Random._float() * (max - min);
     }
     return Random._float();
@@ -40,10 +40,10 @@ export const Random = {
 
   int: function(min, max) {
     // range [min, max)
-    if(arguments.length === 1) {
+    if (arguments.length === 1) {
       return Math.floor(Random._float() * min);
     }
-    if(arguments.length === 2) {
+    if (arguments.length === 2) {
       return Math.floor(Random.float(min, max));
     }
     return Random._int();
@@ -63,7 +63,7 @@ export const Random = {
   },
 
   power: function(min, max, power) {
-    if(arguments.length === 2) {
+    if (arguments.length === 2) {
       power = max;
       max = min;
       min = 0;
@@ -76,13 +76,13 @@ export const Random = {
   },
 
   gauss: function(min, max, g) {
-    if(arguments.length === 2) {
+    if (arguments.length === 2) {
       g = max;
       max = min;
       min = 0;
     }
     var total = 0;
-    for(var i = 0; i < g; i++) {
+    for (var i = 0; i < g; i++) {
       total += Random.float(min, max);
     }
     return total / g;
@@ -114,7 +114,7 @@ export const Random = {
           rand -= choice.weight;
         }
       },
-    }
+    };
   },
 };
 
