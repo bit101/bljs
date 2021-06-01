@@ -2,7 +2,7 @@ import { Color } from "./color.js";
 
 export const Context = {
   extendContext: function(context) {
-    for (let method in Context) {
+    for (const method in Context) {
       context[method] = Context[method];
     }
   },
@@ -52,7 +52,6 @@ export const Context = {
     this.stroke();
     this.restore();
   },
-
 
   roundRect: function(x, y, w, h, r) {
     this.moveTo(x + r, y);
@@ -172,7 +171,7 @@ export const Context = {
       if (i % 2 === 0) {
         r = r0;
       }
-      let angle = Math.PI / points * i;
+      const angle = Math.PI / points * i;
       this.lineTo(Math.cos(angle) * r, Math.sin(angle) * r);
     }
     this.closePath();
@@ -205,8 +204,8 @@ export const Context = {
       path.forEach(( point, index) => {
         newPath.push(point);
         if (index < path.length - 1) {
-          let x = (point.x + path[index + 1].x) / 2 + Math.random() * offset * 2 - offset;
-          let y = (point.y + path[index + 1].y) / 2 + Math.random() * offset * 2 - offset;
+          const x = (point.x + path[index + 1].x) / 2 + Math.random() * offset * 2 - offset;
+          const y = (point.y + path[index + 1].y) / 2 + Math.random() * offset * 2 - offset;
           newPath.push({ x: x, y: y});
         }
       });
@@ -230,10 +229,10 @@ export const Context = {
     this.translate(x, y);
     this.rotate(rotation);
     for (let i = 0; i < res; i++) {
-      let a = Math.PI * 2 * i / res;
-      let x = w * Math.pow(Math.sin(a), 3);
-      let y = -h * (0.8125 * Math.cos(a) - 0.3125 * Math.cos(2 * a) - 0.125 * Math.cos(3 * a) - 0.0625 * Math.cos(4 * a));
-      path.push({ x: x, y: y });
+      const a = Math.PI * 2 * i / res;
+      const xx = w * Math.pow(Math.sin(a), 3);
+      const yy = -h * (0.8125 * Math.cos(a) - 0.3125 * Math.cos(2 * a) - 0.125 * Math.cos(3 * a) - 0.0625 * Math.cos(4 * a));
+      path.push({ x: xx, y: yy });
     }
     this.path(path);
     this.restore();
@@ -264,13 +263,13 @@ export const Context = {
       (points[0].y + points[1].y) / 2
     );
     for (let i = 1; i < points.length - 1; i++) {
-      let p0 = points[i];
-      let p1 = points[i + 1];
-      let midx = (p0.x + p1.x) / 2;
-      let midy = (p0.y + p1.y) / 2;
+      const p0 = points[i];
+      const p1 = points[i + 1];
+      const midx = (p0.x + p1.x) / 2;
+      const midy = (p0.y + p1.y) / 2;
       this.quadraticCurveTo(p0.x, p0.y, midx, midy);
     }
-    let p = points[points.length - 1];
+    const p = points[points.length - 1];
     this.lineTo(p.x, p.y);
   },
 
@@ -281,16 +280,16 @@ export const Context = {
   },
 
   multiLoop: function(points) {
-    let pA = points[0];
-    let pZ = points[points.length - 1];
-    let mid1x = (pZ.x + pA.x) / 2;
-    let mid1y = (pZ.y + pA.y) / 2;
+    const pA = points[0];
+    const pZ = points[points.length - 1];
+    const mid1x = (pZ.x + pA.x) / 2;
+    const mid1y = (pZ.y + pA.y) / 2;
     this.moveTo(mid1x, mid1y);
     for (let i = 0; i < points.length - 1; i++) {
-      let p0 = points[i];
-      let p1 = points[i + 1];
-      let midx = (p0.x + p1.x) / 2;
-      let midy = (p0.y + p1.y) / 2;
+      const p0 = points[i];
+      const p1 = points[i + 1];
+      const midx = (p0.x + p1.x) / 2;
+      const midy = (p0.y + p1.y) / 2;
       this.quadraticCurveTo(p0.x, p0.y, midx, midy);
     }
     this.quadraticCurveTo(pZ.x, pZ.y, mid1x, mid1y);
@@ -410,7 +409,6 @@ export const Context = {
   getAspectRatio: function() {
     return this.canvas.width / this.canvas.height;
   },
-
 
 };
 

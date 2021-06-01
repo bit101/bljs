@@ -10,21 +10,21 @@ export const Noise = {
 
   // Perlin is 3d perlin noise
   perlin(x, y, z) {
-    let X = Math.floor(x) & 255;
-    let Y = Math.floor(y) & 255;
-    let Z = Math.floor(z) & 255;
+    const X = Math.floor(x) & 255;
+    const Y = Math.floor(y) & 255;
+    const Z = Math.floor(z) & 255;
     x -= Math.floor(x);
     y -= Math.floor(y);
     z -= Math.floor(z);
-    let u = Noise.fade(x);
-    let v = Noise.fade(y);
-    let w = Noise.fade(z);
-    let A = Noise.p[X] + Y;
-    let AA = Noise.p[A] + Z;
-    let AB = Noise.p[A + 1] + Z;
-    let B = Noise.p[X + 1] + Y;
-    let BA = Noise.p[B] + Z;
-    let BB = Noise.p[B + 1] + Z;
+    const u = Noise.fade(x);
+    const v = Noise.fade(y);
+    const w = Noise.fade(z);
+    const A = Noise.p[X] + Y;
+    const AA = Noise.p[A] + Z;
+    const AB = Noise.p[A + 1] + Z;
+    const B = Noise.p[X + 1] + Y;
+    const BA = Noise.p[B] + Z;
+    const BB = Noise.p[B + 1] + Z;
     return Noise.lerp(w, Noise.lerp(v, Noise.lerp(u, Noise.grad(Noise.p[AA], x, y, z),
       Noise.grad(Noise.p[BA], x - 1, y, z)),
     Noise.lerp(u, Noise.grad(Noise.p[AB], x, y - 1, z),

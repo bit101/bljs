@@ -21,7 +21,7 @@ export const Random = {
 
   bool: function(percent) {
     // percent is chance of getting true
-    if (percent == null) {
+    if (percent === null) {
       percent = 0.5;
     }
     return Random._float() < percent;
@@ -81,8 +81,8 @@ export const Random = {
       max = min;
       min = 0;
     }
-    var total = 0;
-    for (var i = 0; i < g; i++) {
+    let total = 0;
+    for (let i = 0; i < g; i++) {
       total += Random.float(min, max);
     }
     return total / g;
@@ -94,7 +94,7 @@ export const Random = {
       total: 0,
 
       addChoice: function (choice, weight) {
-        if (weight == null) weight = 1;
+        if (weight === null) weight = 1;
 
         this.choices.push({
           weight: weight,
@@ -105,9 +105,9 @@ export const Random = {
       },
 
       getChoice: function () {
-        var rand = Random.float(0, this.total);
-        for (var i = 0; i < this.choices.length; i++) {
-          var choice = this.choices[i];
+        let rand = Random.float(0, this.total);
+        for (let i = 0; i < this.choices.length; i++) {
+          const choice = this.choices[i];
           if (rand < choice.weight) {
             return choice.choice;
           }

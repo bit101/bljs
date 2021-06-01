@@ -2,7 +2,7 @@ export const Num = {
   difference: function(a, b) {
     return Math.abs(a - b);
   },
-  
+
   norm: function (value, min, max) {
     return (value - min) / (max - min);
   },
@@ -17,7 +17,7 @@ export const Num = {
   },
 
   map: function (srcValue, srcMin, srcMax, dstMin, dstMax) {
-    var norm = this.norm(srcValue, srcMin, srcMax);
+    const norm = this.norm(srcValue, srcMin, srcMax);
     return this.lerp(dstMin, dstMax, norm);
   },
 
@@ -51,7 +51,7 @@ export const Num = {
   },
 
   dotProduct: function(x0, y0, x1, y1, x2, y2, x3, y3) {
-    var dx0 = x1 - x0,
+    const dx0 = x1 - x0,
       dy0 = y1 - y0,
       dx1 = x3 - x2,
       dy1 = y3 - y2;
@@ -59,7 +59,7 @@ export const Num = {
   },
 
   angleBetween: function(x0, y0, x1, y1, x2, y2, x3, y3) {
-    var dp = this.dotProduct(x0, y0, x1, y1, x2, y2, x3, y3),
+    const dp = this.dotProduct(x0, y0, x1, y1, x2, y2, x3, y3),
       mag0 = this.dist(x0, y0, x1, y1),
       mag1 = this.dist(x2, y2, x3, y3);
     return Math.acos(dp / mag0 / mag1);
@@ -87,7 +87,7 @@ export const Num = {
     if (arguments.length === 2) {
       return this.dist(x0.x, x0.y, y0.x, y0.y);
     }
-    var dx = x1 - x0,
+    const dx = x1 - x0,
       dy = y1 - y0;
     return Math.sqrt(dx * dx + dy * dy);
   },
@@ -100,7 +100,7 @@ export const Num = {
   },
 
   bezier: function(p0, p1, p2, p3, t) {
-    var oneMinusT = 1 - t,
+    const oneMinusT = 1 - t,
       m0 = oneMinusT * oneMinusT * oneMinusT,
       m1 = 3 * oneMinusT * oneMinusT * t,
       m2 = 3 * oneMinusT * t * t,
@@ -112,7 +112,7 @@ export const Num = {
   },
 
   quadratic: function(p0, p1, p2, t) {
-    var oneMinusT = 1 - t,
+    const oneMinusT = 1 - t,
       m0 = oneMinusT * oneMinusT,
       m1 = 2 * oneMinusT * t,
       m2 = t * t;
@@ -120,11 +120,10 @@ export const Num = {
       x: m0 * p0.x + m1 * p1.x + m2 * p2.x,
       y: m0 * p0.y + m1 * p1.y + m2 * p2.y,
     };
-
   },
 
   pointInCircle: function(px, py, cx, cy, cr) {
-    var dist = this.dist(px, py, cx, cy);
+    const dist = this.dist(px, py, cx, cy);
     return dist <= cr;
   },
 
@@ -136,7 +135,7 @@ export const Num = {
   },
 
   segmentIntersect: function(p0, p1, p2, p3) {
-    var A1 = p1.y - p0.y,
+    const A1 = p1.y - p0.y,
       B1 = p0.x - p1.x,
       C1 = A1 * p0.x + B1 * p0.y,
       A2 = p3.y - p2.y,
@@ -144,11 +143,11 @@ export const Num = {
       C2 = A2 * p2.x + B2 * p2.y,
       denominator = A1 * B2 - A2 * B1;
 
-    if (denominator == 0) {
+    if (denominator === 0) {
       return null;
     }
 
-    var intersectX = (B2 * C1 - B1 * C2) / denominator,
+    const intersectX = (B2 * C1 - B1 * C2) / denominator,
       intersectY = (A1 * C2 - A2 * C1) / denominator,
       rx0 = (intersectX - p0.x) / (p1.x - p0.x),
       ry0 = (intersectY - p0.y) / (p1.y - p0.y),
@@ -162,13 +161,12 @@ export const Num = {
         y: intersectY,
       };
     }
-    else {
-      return null;
-    }
+
+    return null;
   },
 
   tangentPointToCircle: function(x, y, cx, cy, cr, anticlockwise) {
-    var dist = Math.dist(x, y, cx, cy),
+    const dist = Math.dist(x, y, cx, cy),
       dir = anticlockwise ? 1 : -1,
       angle = Math.acos(-cr / dist) * dir,
       baseAngle = Math.atan2(cy - y, cx - x),
@@ -184,9 +182,9 @@ export const Num = {
     const sin60r = Math.sin(Math.PI / 3) * size;
     const xInc = 2 * sin60r;
     const yInc = size * 1.5;
-    let offset = y % 2 * sin60r;
-    let xx = (x * xInc + offset);
-    let yy = (y * yInc);
+    const offset = y % 2 * sin60r;
+    const xx = (x * xInc + offset);
+    const yy = (y * yInc);
     if (xfirst) {
       return {x: xx, y: yy};
     }
