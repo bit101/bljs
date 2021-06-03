@@ -957,6 +957,7 @@ var bljs = (function (exports) {
     },
 
     grid: function(x, y, w, h, xres, yres) {
+      this.beginPath();
       for (let xx = x; xx < x + w; xx += xres) {
         this.moveTo(xx, y);
         this.lineTo(xx, y + h);
