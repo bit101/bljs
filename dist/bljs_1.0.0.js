@@ -1086,11 +1086,14 @@ var bljs = (function (exports) {
       this.x = x;
       this.y = y;
       this.context = context2d;
+      this.canvas = this.context.canvas;
       this.moveHandler = moveHandler;
       this.onMouseDown = this.onMouseDown.bind(this);
       this.onMouseMove = this.onMouseMove.bind(this);
       this.onMouseUp = this.onMouseUp.bind(this);
-      this.context.canvas.addEventListener("mousedown", this.onMouseDown);
+      this.canvas.addEventListener("mousedown", this.onMouseDown);
+      this.snap = false;
+      this.gridSize = 10;
     }
 
     render() {
@@ -1106,7 +1109,8 @@ var bljs = (function (exports) {
     }
 
     onMouseDown(event) {
-      const bounds = this.context.canvas.getBoundingClientRect();
+      this.canvas.style.cursor = "pointer";
+      const bounds = this.canvas.getBoundingClientRect();
       this.mouseX = event.clientX - bounds.left;
       this.mouseY = event.clientY - bounds.top;
       const dist = Num.dist(this.mouseX, this.mouseY, this.x, this.y);
@@ -1119,15 +1123,26 @@ var bljs = (function (exports) {
     }
 
     onMouseMove(event) {
-      const bounds = this.context.canvas.getBoundingClientRect();
+      const bounds = this.canvas.getBoundingClientRect();
       this.mouseX = event.clientX - bounds.left;
       this.mouseY = event.clientY - bounds.top;
-      this.x = this.mouseX - this.offsetX;
-      this.y = this.mouseY - this.offsetY;
+      let x = this.mouseX - this.offsetX;
+      let y = this.mouseY - this.offsetY;
+      x = Math.min(x, this.canvas.width);
+      x = Math.max(x, 0);
+      y = Math.min(y, this.canvas.height);
+      y = Math.max(y, 0);
+      if (this.snap) {
+        x = Math.round(x / this.gridSize) * this.gridSize;
+        y = Math.round(y / this.gridSize) * this.gridSize;
+      }
+      this.x = x;
+      this.y = y;
       this.moveHandler();
     }
 
     onMouseUp() {
+      this.canvas.style.cursor = "default";
       document.removeEventListener("mousemove", this.onMouseMove);
       document.removeEventListener("mouseup", this.onMouseUp);
     }
