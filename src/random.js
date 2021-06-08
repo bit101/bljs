@@ -5,7 +5,12 @@ export const Random = {
   _m: Math.pow(2, 32),
 
   seed: function(seed) {
-    Random._seed = seed;
+    // prevent early sequences of sequential seeds from being too similar.
+    // this is a hack - the first int() you get after seed(0) will be 1777110879.
+    // but if 0 comes up in the sequence, the following int() will be 1013904223.
+    // likewise for any other seed. these should be the same.
+    // not a big deal for my use cases.
+    Random._seed = Math.pow(seed + Random._a, 3) % Random._m;
   },
 
   _int: function() {
@@ -21,7 +26,7 @@ export const Random = {
 
   bool: function(percent) {
     // percent is chance of getting true
-    if (percent === null) {
+    if (percent === null || percent === undefined) {
       percent = 0.5;
     }
     return Random._float() < percent;
@@ -35,6 +40,7 @@ export const Random = {
     if (arguments.length === 2) {
       return min + Random._float() * (max - min);
     }
+    // zero args
     return Random._float();
   },
 
@@ -46,7 +52,40 @@ export const Random = {
     if (arguments.length === 2) {
       return Math.floor(Random.float(min, max));
     }
+    // zero args
     return Random._int();
+  },
+
+  intArray(count, min, max) {
+    const arr = [];
+    for (let i = 0; i < count; i++) {
+      arr.push(Random.int(min, max));
+    }
+    return arr;
+  },
+
+  floatArray(count, min, max) {
+    const arr = [];
+    for (let i = 0; i < count; i++) {
+      arr.push(Random.float(min, max));
+    }
+    return arr;
+  },
+
+  boolArray(count, percent) {
+    const arr = [];
+    for (let i = 0; i < count; i++) {
+      arr.push(Random.bool(percent));
+    }
+    return arr;
+  },
+
+  pointArray(count, x, y, w, h) {
+    const arr = [];
+    for (let i = 0; i < count; i++) {
+      arr.push(Random.point(x, y, w, h));
+    }
+    return arr;
   },
 
   point: function(x, y, w, h) {
