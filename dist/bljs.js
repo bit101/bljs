@@ -792,6 +792,7 @@ var bljs = (function (exports) {
 
     setShadow: function(color, offsetX, offsetY, blur) {
       this.shadowColor = color;
+
       this.shadowOffsetX = offsetX;
       this.shadowOffsetY = offsetY;
       this.shadowBlur = blur;
