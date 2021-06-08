@@ -1,11 +1,11 @@
 {
   "name": "bljs",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "bitlib for js",
   "main": "rollup.config.js",
   "scripts": {
-    "uglify": "uglifyjs dist/bljs_1.0.0.js -o dist/bljs_1.0.0.min.js",
-    "uglify-mod": "uglifyjs dist/bljs_1.0.0.mjs -o dist/bljs_1.0.0.min.mjs",
+    "uglify": "uglifyjs dist/bljs.js -o dist/bljs.min.js",
+    "uglify-mod": "uglifyjs dist/bljs.mjs -o dist/bljs.min.mjs",
     "build": "rollup -c && npm run uglify && npm run uglify-mod"
   },
   "repository": {

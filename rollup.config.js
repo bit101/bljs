@@ -1,15 +1,13 @@
-const tag = "1.0.0";
-
 export default {
   input: "src/bljs.js",
   output: [
     {
-      file: `dist/bljs_${tag}.js`,
+      file: `dist/bljs.js`,
       format: 'iife',
       name: "bljs",
     },
     {
-      file: `dist/bljs_${tag}.mjs`,
+      file: `dist/bljs.mjs`,
       format: 'es',
     },
   ],
