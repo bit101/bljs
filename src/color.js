@@ -1,47 +1,125 @@
 import { Num } from "./num.js";
 import { Random } from "./random.js";
 
+/**
+ * @namespace Color
+ */
 export const Color = {
+  /**
+   * @function rgb
+   * @memberof Color
+   * @description Creates a color using red, green and blue values in the range of 0 to 255.
+   * @param {number} r - The red value of the color.
+   * @param {number} g - The green value of the color.
+   * @param {number} b - The blue value of the color.
+   * @returns {object} A new Color object.
+   */
   rgb: function(r, g, b) {
     return Color.rgba(r, g, b, 1);
   },
 
+  /**
+   * @function rgba
+   * @memberof Color
+   * @description Creates a color using red, green and blue values in the range of 0 to 255, and an alpha value in the range of 0.0 to 1.0.
+   * @param {number} r - The red value of the color.
+   * @param {number} g - The green value of the color.
+   * @param {number} b - The blue value of the color.
+   * @param {number} a - The alpha value of the color.
+   * @returns {object} A new Color object.
+   */
   rgba: function(r, g, b, a) {
     return {
       red: Math.floor(r),
       green: Math.floor(g),
       blue: Math.floor(b),
       alpha: Math.floor(a),
+      isColorObject: true,
       toString: function() {
         return `rgba(${this.red}, ${this.green}, ${this.blue}, ${this.alpha})`;
       },
     };
   },
 
+  /**
+   * @function rgbf
+   * @memberof Color
+   * @description Creates a color using red, green and blue values in the range of 0.0 to 1.0.
+   * @param {number} r - The red value of the color.
+   * @param {number} g - The green value of the color.
+   * @param {number} b - The blue value of the color.
+   * @param {number} a - The alpha value of the color.
+   * @returns {object} A new Color object.
+   */
   rgbf: function(r, g, b) {
     return Color.rgbaf(r, g, b, 1);
   },
 
+  /**
+   * @function rgbaf
+   * @memberof Color
+   * @description Creates a color using red, green, blue and alpha values in the range of 0.0 to 1.0.
+   * @param {number} r - The red value of the color.
+   * @param {number} g - The green value of the color.
+   * @param {number} b - The blue value of the color.
+   * @param {number} a - The alpha value of the color.
+   * @returns {object} A new Color object.
+   */
   rgbaf: function(r, g, b, a) {
     return Color.rgb(r * 255, g * 255, b * 255, a);
   },
 
+  /**
+   * @function number
+   * @memberof Color
+   * @description Creates a color from a 24-bit integer in the range of 0 to 16,777,215 (0x000000 to 0xffffff).
+   * @param {number} num - The color value.
+   * @returns {object} A new Color object.
+   */
   number: function(num) {
     return Color.rgb(num >> 16, num >> 8 & 0xff, num & 0xff);
   },
 
+  /**
+   * @function randomRGB
+   * @memberof Color
+   * @description Creates a random color.
+   * @returns {object} A new Color object.
+   */
   randomRGB: function() {
     return Color.number(Math.floor(Random.int(0xffffff)));
   },
 
+  /**
+   * @function gray
+   * @memberof Color
+   * @description Creates a color which is a shade of gray.
+   * @param {number} shade - The shade of gray (0 to 255).
+   * @returns {object} A new Color object.
+   */
   gray: function(shade) {
     return Color.rgb(shade, shade, shade);
   },
 
+  /**
+   * @function randomGray
+   * @memberof Color
+   * @description Creates a random shade of gray.
+   * @returns {object} A new Color object.
+   */
   randomGray: function() {
     return Color.gray(Random.int(255));
   },
 
+  /**
+   * @function hsv
+   * @memberof Color
+   * @description Creates a color using hue, saturation and value.
+   * @param {number} h - The hue of the color (0 to 360).
+   * @param {number} s - The saturation of the color (0.0 to 1.0).
+   * @param {number} v - The value of the color (0.0 to 1.0).
+   * @returns {object} A new Color object.
+   */
   hsv: function(h, s, v) {
     h /= 360;
     let r, g, b;
@@ -61,13 +139,22 @@ export const Color = {
     return Color.rgb(r * 255, g * 255, b * 255);
   },
 
+  /**
+   * @function lerp
+   * @memberof Color
+   * @description Linearly interpolates between two colors. Each color can be in the form of a string supported by `Color.string()`, a number suppoted by `Color.number()`, or a Color object.
+   * @param {number} t - The interpolation value from 0.0 to 1.0.
+   * @param colorA - The first color value. Can be a string or number.
+   * @param colorB - The second color value. Can be a string or number.
+   * @returns {object} A new Color object.
+   */
   lerp: function(t, colorA, colorB) {
     let ca, cb;
     if (typeof colorA === "string") {
       ca = Color.string(colorA);
     }
     else if (typeof colorA === "number") {
-      ca = Color.num(colorA);
+      ca = Color.number(colorA);
     }
     else if (colorA.isColorObject) {
       ca = colorA;
@@ -88,6 +175,14 @@ export const Color = {
     return Color.rgba(r, g, b, a);
   },
 
+  /**
+   * @function string
+   * @memberof Color
+   * @description Creates a color parsed from various string formats. Includes:
+   * `#fc0`, `#ffcc00`, `rgb(255, 128, 0)`, or `rgba(255, 128, 0, 255)`, or any standard CSS color name.
+   * @param {string} str - The string to parse.
+   * @returns {object} A new Color object.
+   */
   string: function(str) {
     if (str.charAt(0) === "#" && str.length === 7) {
       str = "0x" + str.substr(1);
