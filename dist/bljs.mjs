@@ -1367,6 +1367,6 @@ const Utils = {
 
 };
 
-const version = "1.0.0";
+const version = "1.1.0";
 
 export { Anim, Canvas, Color, Context, DragPoint, FPS, Noise, Num, Random, Utils, version };
