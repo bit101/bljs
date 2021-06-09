@@ -1,17 +1,37 @@
 var bljs = (function (exports) {
   'use strict';
 
+  /**
+   * Creates an animation that runs a render callback function every frame. Also keeps track of fps, which is passed to the render callback function.
+   * @example
+   * const anim = new Anim(render, false);
+   * anim.run();
+   * function render() {
+   *   // render code
+   * }
+   */
   class Anim {
+    /**
+     * Constructor
+     * @param {function} renderCallback - A function that will be called on every frame.
+     * @param {boolean} running - Whether or not the animation should run immediately.
+     */
     constructor(renderCallback, running) {
       this._fps = "";
       this._renderCallback = renderCallback;
       this.running = running;
     }
 
+    /**
+     * Starts the animation running.
+     */
     run() {
       this.running = true;
     }
 
+    /**
+     * Stops the animation.
+     */
     stop() {
       this.running = false;
     }
@@ -32,6 +52,9 @@ var bljs = (function (exports) {
       }
     }
 
+    /**
+     * Gets and sets the running state of the animation.
+     */
     get running() {
       return this._running;
     }
@@ -849,6 +872,7 @@ var bljs = (function (exports) {
       this.moveTo(x0, y0);
       this.lineTo(x1, y1);
       this.stroke();
+      return this;
     },
 
     /**
@@ -874,6 +898,7 @@ var bljs = (function (exports) {
       this.lineTo(p2 + overlap, 0);
       this.stroke();
       this.restore();
+      return this;
     },
 
     /**
@@ -896,6 +921,7 @@ var bljs = (function (exports) {
       this.lineTo(offset + length, 0);
       this.stroke();
       this.restore();
+      return this;
     },
 
     /**
@@ -919,6 +945,7 @@ var bljs = (function (exports) {
       this.arc(x + r, y + h - r, r, Math.PI / 2, Math.PI);
       this.lineTo(x, y + r);
       this.arc(x + r, y + r, r, Math.PI, -Math.PI / 2);
+      return this;
     },
 
     /**
@@ -936,6 +963,7 @@ var bljs = (function (exports) {
       this.beginPath();
       this.round(x, y, w, h, r);
       this.fill();
+      return this;
     },
 
     /**
@@ -953,6 +981,7 @@ var bljs = (function (exports) {
       this.beginPath();
       this.roundRect(x, y, w, h, r);
       this.stroke();
+      return this;
     },
 
     /**
@@ -966,6 +995,7 @@ var bljs = (function (exports) {
      */
     circle: function(x, y, r) {
       this.arc(x, y, r, 0, Math.PI * 2);
+      return this;
     },
 
     /**
@@ -981,6 +1011,7 @@ var bljs = (function (exports) {
       this.beginPath();
       this.circle(x, y, r);
       this.stroke();
+      return this;
     },
 
     /**
@@ -996,6 +1027,7 @@ var bljs = (function (exports) {
       this.beginPath();
       this.circle(x, y, r);
       this.fill();
+      return this;
     },
 
     /**
@@ -1017,6 +1049,7 @@ var bljs = (function (exports) {
       this.scale(xr, yr);
       this.circle(0, 0, 1);
       this.restore();
+      return this;
     },
 
     /**
@@ -1033,6 +1066,7 @@ var bljs = (function (exports) {
       this.beginPath();
       this.ellipse(x, y, xr, yr);
       this.fill();
+      return this;
     },
 
     /**
@@ -1049,6 +1083,7 @@ var bljs = (function (exports) {
       this.beginPath();
       this.ellipse(x, y, xr, yr);
       this.stroke();
+      return this;
     },
 
     /**
@@ -1066,6 +1101,7 @@ var bljs = (function (exports) {
       if (close) {
         this.closePath();
       }
+      return this;
     },
 
     /**
@@ -1080,6 +1116,7 @@ var bljs = (function (exports) {
       this.beginPath();
       this.path(points, close);
       this.fill();
+      return this;
     },
 
     /**
@@ -1094,6 +1131,7 @@ var bljs = (function (exports) {
       this.beginPath();
       this.path(points, close);
       this.stroke();
+      return this;
     },
 
     /**
@@ -1118,6 +1156,7 @@ var bljs = (function (exports) {
       }
       this.lineTo(r, 0.0);
       this.restore();
+      return this;
     },
 
     /**
@@ -1135,6 +1174,7 @@ var bljs = (function (exports) {
       this.beginPath();
       this.polygon(x, y, r, sides, rotation);
       this.stroke();
+      return this;
     },
 
     /**
@@ -1152,6 +1192,7 @@ var bljs = (function (exports) {
       this.beginPath();
       this.polygon(x, y, r, sides, rotation);
       this.fill();
+      return this;
     },
 
     /**
@@ -1180,6 +1221,7 @@ var bljs = (function (exports) {
       }
       this.closePath();
       this.restore();
+      return this;
     },
 
     /**
@@ -1198,6 +1240,7 @@ var bljs = (function (exports) {
       this.beginPath();
       this.star(x, y, r0, r1, points, rotation);
       this.stroke();
+      return this;
     },
 
     /**
@@ -1216,6 +1259,7 @@ var bljs = (function (exports) {
       this.beginPath();
       this.star(x, y, r0, r1, points, rotation);
       this.fill();
+      return this;
     },
 
     /**
@@ -1253,6 +1297,7 @@ var bljs = (function (exports) {
         path = newPath;
       }
       this.path(path);
+      return this;
     },
 
     /**
@@ -1271,6 +1316,7 @@ var bljs = (function (exports) {
       this.beginPath();
       this.fractalLine(x0, y0, x1, y1, roughness, iterations);
       this.stroke();
+      return this;
     },
 
     /**
@@ -1299,6 +1345,7 @@ var bljs = (function (exports) {
       }
       this.path(path);
       this.restore();
+      return this;
     },
 
     /**
@@ -1316,6 +1363,7 @@ var bljs = (function (exports) {
       this.beginPath();
       this.heart(x, y, w, h, rotation);
       this.stroke();
+      return this;
     },
 
     /**
@@ -1333,14 +1381,31 @@ var bljs = (function (exports) {
       this.beginPath();
       this.heart(x, y, w, h, rotation);
       this.fill();
+      return this;
     },
 
+    /**
+     * @function points
+     * @memberof Context
+     * @description Renders an array of points with a circle of a given radius.
+     * @param {array} points - An array of point objects (any object with an x and y property).
+     * @param {number} radius - The radius of the circle that will be drawn for each point.
+     * @returns This context.
+     */
     points: function(points, radius) {
       points.forEach(p => {
         this.fillCircle(p.x, p.y, radius);
       });
+      return this;
     },
 
+    /**
+     * @function multiCurve
+     * @memberof Context
+     * @description Draws a smooth, continuous curve through a series of points.
+     * @param {array} points - An array of point objects (any object with an x and y property).
+     * @returns This context.
+     */
     multiCurve: function(points) {
       this.moveTo(points[0].x, points[0].y);
       this.lineTo(
@@ -1356,14 +1421,30 @@ var bljs = (function (exports) {
       }
       const p = points[points.length - 1];
       this.lineTo(p.x, p.y);
+      return this;
     },
 
+    /**
+     * @function strokeMultiCurve
+     * @memberof Context
+     * @description Draws and strokes a smooth, continuous curve through a series of points.
+     * @param {array} points - An array of point objects (any object with an x and y property).
+     * @returns This context.
+     */
     strokeMultiCurve: function(points) {
       this.beginPath();
       this.multiCurve(points);
       this.stroke();
+      return this;
     },
 
+    /**
+     * @function multiLoop
+     * @memberof Context
+     * @description Draws a smooth, continuous closed loop through a series of points.
+     * @param {array} points - An array of point objects (any object with an x and y property).
+     * @returns This context.
+     */
     multiLoop: function(points) {
       const pA = points[0];
       const pZ = points[points.length - 1];
@@ -1378,20 +1459,49 @@ var bljs = (function (exports) {
         this.quadraticCurveTo(p0.x, p0.y, midx, midy);
       }
       this.quadraticCurveTo(pZ.x, pZ.y, mid1x, mid1y);
+      return this;
     },
 
+    /**
+     * @function strokeMultiLoop
+     * @memberof Context
+     * @description Draws a and strokes a smooth, continuous closed loop through a series of points.
+     * @param {array} points - An array of point objects (any object with an x and y property).
+     * @returns This context.
+     */
     strokeMultiLoop: function(points) {
       this.beginPath();
       this.multiLoop(points);
       this.stroke();
+      return this;
     },
 
+    /**
+     * @function fillMultiLoop
+     * @memberof Context
+     * @description Draws and fills a smooth, continuous closed loop through a series of points.
+     * @param {array} points - An array of point objects (any object with an x and y property).
+     * @returns This context.
+     */
     fillMultiLoop: function(points) {
       this.beginPath();
       this.multiLoop(points);
       this.fill();
+      return this;
     },
 
+    /**
+     * @function grid
+     * @memberof Context
+     * @description Draws and strokes a rectangular grid.
+     * @param {number} x - The x position of the area to draw the grid in.
+     * @param {number} y - The y position of the area to draw the grid in.
+     * @param {number} w - The width of the area to draw the grid in.
+     * @param {number} h - The height of the area to draw the grid in.
+     * @param {number} xres - The horizontal spacing of grid lines.
+     * @param {number} yres - The vertical spacing of grid lines.
+     * @returns This context.
+     */
     grid: function(x, y, w, h, xres, yres) {
       this.beginPath();
       for (let xx = x; xx < x + w; xx += xres) {
@@ -1403,17 +1513,30 @@ var bljs = (function (exports) {
         this.lineTo(x + w, yy);
       }
       this.stroke();
+      return this;
     },
 
-    hexGrid: function(x, y, w, h, res0, res1) {
-      const sin60r = Math.sin(Math.PI / 3) * res0;
+    /**
+     * @function hexGrid
+     * @memberof Context
+     * @description Draws a hexagonal grid.
+     * @param {number} x - The x position of the area to draw the grid in.
+     * @param {number} y - The y position of the area to draw the grid in.
+     * @param {number} w - The width of the area to draw the grid in.
+     * @param {number} h - The height of the area to draw the grid in.
+     * @param {number} size0 - The size of the hexagons used to create the grid spacing
+     * @param {number} size1 - The size of the hexagons that will actually be drawn. If smaller than size0, hexagons will be separated from each other by the difference in these two parameters.
+     * @returns This context.
+     */
+    hexGrid: function(x, y, w, h, size0, size1) {
+      const sin60r = Math.sin(Math.PI / 3) * size0;
       const xInc = 2 * sin60r;
-      const yInc = res0 * 1.5;
+      const yInc = size0 * 1.5;
       let offset = 0;
 
       for (let yy = y; yy < y + h + yInc; yy += yInc) {
         for (let xx = x; xx < x + w + xInc; xx += xInc) {
-          this.polygon(xx + offset, yy, res1, 6, Math.PI / 2);
+          this.polygon(xx + offset, yy, size1, 6, Math.PI / 2);
         }
         if (offset === 0) {
           offset = sin60r;
@@ -1421,77 +1544,176 @@ var bljs = (function (exports) {
           offset = 0;
         }
       }
+      return this;
     },
 
-    strokeHexGrid: function(x, y, w, h, res0, res1) {
+    /**
+     * @function strokeHexGrid
+     * @memberof Context
+     * @description Draws and strokes a hexagonal grid.
+     * @param {number} x - The x position of the area to draw the grid in.
+     * @param {number} y - The y position of the area to draw the grid in.
+     * @param {number} w - The width of the area to draw the grid in.
+     * @param {number} h - The height of the area to draw the grid in.
+     * @param {number} size0 - The size of the hexagons used to create the grid spacing
+     * @param {number} size1 - The size of the hexagons that will actually be drawn. If smaller than size0, hexagons will be separated from each other by the difference in these two parameters.
+     * @returns This context.
+     */
+    strokeHexGrid: function(x, y, w, h, size0, size1) {
       this.save();
       this.rect(x, y, w, h);
       this.clip();
       this.beginPath();
-      this.hexGrid(x, y, w, h, res0, res1);
+      this.hexGrid(x, y, w, h, size0, size1);
       this.stroke();
       this.restore();
+      return this;
     },
 
-    fillHexGrid: function(x, y, w, h, res0, res1) {
+    /**
+     * @function fillHexGrid
+     * @memberof Context
+     * @description Draws and fills a hexagonal grid.
+     * @param {number} x - The x position of the area to draw the grid in.
+     * @param {number} y - The y position of the area to draw the grid in.
+     * @param {number} w - The width of the area to draw the grid in.
+     * @param {number} h - The height of the area to draw the grid in.
+     * @param {number} size0 - The size of the hexagons used to create the grid spacing
+     * @param {number} size1 - The size of the hexagons that will actually be drawn. If smaller than size0, hexagons will be separated from each other by the difference in these two parameters.
+     * @returns This context.
+     */
+    fillHexGrid: function(x, y, w, h, size0, size1) {
       this.save();
       this.rect(x, y, w, h);
       this.clip();
       this.beginPath();
-      this.hexGrid(x, y, w, h, res0, res1);
+      this.hexGrid(x, y, w, h, size0, size1);
       this.fill();
       this.restore();
+      return this;
     },
 
+    /**
+     * Clears the context to the specified rgb color.
+     * @param {number} r - The red channel of the color.
+     * @param {number} g - The green channel of the color.
+     * @param {number} b - The blue channel of the color.
+     * @returns This context.
+     */
     clearRGB: function(r, g, b) {
       this.save();
       this.setTransform(1, 0, 0, 1, 0, 0);
       this.fillStyle = `rgb(${r}, ${g}, ${b})`;
       this.fillRect(0, 0, this.canvas.width, this.canvas.height);
       this.restore();
+      return this;
     },
 
+    /**
+     * Clears the context to white.
+     * @returns This context.
+     */
     clearWhite: function() {
       this.clearRGB(255, 255, 255);
+      return this;
     },
 
+    /**
+     * Clears the context to black.
+     * @returns This context.
+     */
     clearBlack: function() {
       this.clearRGB(0, 0, 0);
+      return this;
     },
 
+    /**
+     * Clears the context to the specified grey shade.
+     * @param {number} g - The grey shade.
+     * @returns This context.
+     */
     clearGrey: function(g) {
       this.clearRGB(g, g, g);
+      return this;
     },
 
+    /**
+     * Clears the context to the specified color.
+     * @param {object} color - The color (from the Color module) to clear with.
+     * @returns This context.
+     */
     clearColor(color) {
       this.save();
       this.setTransform(1, 0, 0, 1, 0, 0);
       this.fillStyle = color.toString();
       this.fillRect(0, 0, this.canvas.width, this.canvas.height);
       this.restore();
+      return this;
     },
 
+    /**
+     * Set the fill color to the specified color.
+     * @param {number} r - The red channel of the color.
+     * @param {number} g - The green channel of the color.
+     * @param {number} b - The blue channel of the color.
+     * @returns This context.
+     */
     setFillRGB: function(r, g, b) {
       this.fillStyle = Color.rgb(r, g, b).toString();
+      return this;
     },
 
+    /**
+     * Set the fill color to the specified color.
+     * @param {number} h - The hue of the color.
+     * @param {number} s - The saturation of the color.
+     * @param {number} v - The value of the color.
+     * @returns This context.
+     */
     setFillHSV: function(h, s, v) {
       this.fillStyle = Color.hsv(h, s, v).toString();
+      return this;
     },
 
+    /**
+     * Set the stroke color to the specified color.
+     * @param {number} r - The red channel of the color.
+     * @param {number} g - The green channel of the color.
+     * @param {number} b - The blue channel of the color.
+     * @returns This context.
+     */
     setStrokeRGB: function(r, g, b) {
       this.strokeStyle = Color.rgb(r, g, b).toString();
+      return this;
     },
 
+    /**
+     * Set the stroke color to the specified color.
+     * @param {number} h - The hue of the color.
+     * @param {number} s - The saturation of the color.
+     * @param {number} v - The value of the color.
+     * @returns This context.
+     */
     setStrokeHSV: function(h, s, v) {
       this.strokeStyle = Color.hsv(h, s, v).toString();
+      return this;
     },
 
+    /**
+     * Gets the color value at a particular x, y position.
+     * @param {number} x - The x position of the pixel to get the color of.
+     * @param {number} y - The y position of the pixel to get the color of.
+     * @returns a string represenation of the color at that pixel.
+     */
     getPixel: function(x, y) {
       const data = this.getImageData(x, y, 1, 1);
       return `rgba(${data.data[0]}, ${data.data[1]}, ${data.data[2]}, ${data.data[3]}`;
     },
 
+    /**
+     * Gets the aspect ratio of the canvas/context (width divided by height).
+     * @returns The aspect ratio.
+     */
     getAspectRatio: function() {
       return this.canvas.width / this.canvas.height;
     },
