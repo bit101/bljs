@@ -781,28 +781,66 @@ const Color = {
   },
 };
 
+/**
+ * @namespace Context
+ */
 const Context = {
+  /**
+   * @function extendContext
+   * @memberof Context
+   * @description Extends a 2d rendering context to include additional useful methods.
+   * @param {object} context - The context to extend.
+   */
   extendContext: function(context) {
     for (const method in Context) {
       context[method] = Context[method];
     }
   },
 
+  /**
+   * @function setShadow
+   * @memberof Context
+   * @description Sets all of the dropshadow parameters.
+   * @param {string} color - The color of the shadow
+   * @param {number} offsetX - The x position of the shadow.
+   * @param {number} offsetY - The y position of the shadow.
+   * @param {number} blur - How much the shadow will be blurred.
+   * @returns This context.
+   */
   setShadow: function(color, offsetX, offsetY, blur) {
     this.shadowColor = color;
-
     this.shadowOffsetX = offsetX;
     this.shadowOffsetY = offsetY;
     this.shadowBlur = blur;
+    return this;
   },
 
+  /**
+   * @function plot
+   * @memberof Context
+   * @description Plots a single pixel.
+   * @param {number} x - The x position of the point to plot.
+   * @param {number} y - The y position of the point to plot.
+   * @returns This context.
+   */
   plot: function(x, y) {
     this.save();
     this.translate(x, y);
     this.fillRect(x - 0.5, y - 0.5, 1, 1);
     this.restore();
+    return this;
   },
 
+  /**
+   * @function line
+   * @memberof Context
+   * @description Draws a line between two points.
+   * @param {number} x0 - The x position of the first point.
+   * @param {number} y0 - The y position of the first point.
+   * @param {number} x1 - The x position of the second point.
+   * @param {number} y1 - The y position of the second point.
+   * @returns This context.
+   */
   line: function(x0, y0, x1, y1) {
     this.beginPath();
     this.moveTo(x0, y0);
@@ -810,6 +848,17 @@ const Context = {
     this.stroke();
   },
 
+  /**
+   * @function lineThrough
+   * @memberof Context
+   * @description Draws a line segment through, but overlapping, two points.
+   * @param {number} x0 - The x position of the first point.
+   * @param {number} y0 - The y position of the first point.
+   * @param {number} x1 - The x position of the second point.
+   * @param {number} y1 - The y position of the second point.
+   * @param {number} overlap - How many pixels beyond each point to draw the line.
+   * @returns This context.
+   */
   lineThrough: function(x0, y0, x1, y1, overlap) {
     this.save();
     this.translate(x0, y0);
@@ -824,6 +873,17 @@ const Context = {
     this.restore();
   },
 
+  /**
+   * @function ray
+   * @memberof Context
+   * @description Draws a ray fro a given point.
+   * @param {number} x - The x position of the point.
+   * @param {number} y - The y position of the point.
+   * @param {number} angle - The angle of the ray.
+   * @param {number} offset - An offset from the point to begin drawing the ray.
+   * @param {number} angle - The length of the ray.
+   * @returns This context.
+   */
   ray: function(x, y, angle, offset, length) {
     this.save();
     this.translate(x, y);
@@ -835,6 +895,17 @@ const Context = {
     this.restore();
   },
 
+  /**
+   * @function roundRect
+   * @memberof Context
+   * @description Draws a rectangle with rounded corners.
+   * @param {number} x - The x position of the rectangle.
+   * @param {number} y - The y position of the rectangle.
+   * @param {number} w - The width of the rectangle.
+   * @param {number} h - The height of the rectangle.
+   * @param {number} r - The radius of the corners.
+   * @returns This context.
+   */
   roundRect: function(x, y, w, h, r) {
     this.moveTo(x + r, y);
     this.lineTo(x + w - r, y);
@@ -847,34 +918,93 @@ const Context = {
     this.arc(x + r, y + r, r, Math.PI, -Math.PI / 2);
   },
 
+  /**
+   * @function fillRoundRect
+   * @memberof Context
+   * @description Draws a and fills rectangle with rounded corners.
+   * @param {number} x - The x position of the rectangle.
+   * @param {number} y - The y position of the rectangle.
+   * @param {number} w - The width of the rectangle.
+   * @param {number} h - The height of the rectangle.
+   * @param {number} r - The radius of the corners.
+   * @returns This context.
+   */
   fillRoundRect: function(x, y, w, h, r) {
     this.beginPath();
     this.round(x, y, w, h, r);
     this.fill();
   },
 
+  /**
+   * @function strokeRoundRect
+   * @memberof Context
+   * @description Draws a and strokes rectangle with rounded corners.
+   * @param {number} x - The x position of the rectangle.
+   * @param {number} y - The y position of the rectangle.
+   * @param {number} w - The width of the rectangle.
+   * @param {number} h - The height of the rectangle.
+   * @param {number} r - The radius of the corners.
+   * @returns This context.
+   */
   strokeRoundRect: function(x, y, w, h, r) {
     this.beginPath();
     this.roundRect(x, y, w, h, r);
     this.stroke();
   },
 
+  /**
+   * @function circle
+   * @memberof Context
+   * @description Draws a circle.
+   * @param {number} x - The x position of the circle.
+   * @param {number} y - The y position of the circle.
+   * @param {number} r - The radius of the circle.
+   * @returns This context.
+   */
   circle: function(x, y, r) {
     this.arc(x, y, r, 0, Math.PI * 2);
   },
 
+  /**
+   * @function strokeCircle
+   * @memberof Context
+   * @description Draws and strokes a circle.
+   * @param {number} x - The x position of the circle.
+   * @param {number} y - The y position of the circle.
+   * @param {number} r - The radius of the circle.
+   * @returns This context.
+   */
   strokeCircle: function(x, y, r) {
     this.beginPath();
     this.circle(x, y, r);
     this.stroke();
   },
 
+  /**
+   * @function fillCircle
+   * @memberof Context
+   * @description Draws and fills a circle.
+   * @param {number} x - The x position of the circle.
+   * @param {number} y - The y position of the circle.
+   * @param {number} r - The radius of the circle.
+   * @returns This context.
+   */
   fillCircle: function(x, y, r) {
     this.beginPath();
     this.circle(x, y, r);
     this.fill();
   },
 
+  /**
+   * @function ellipse
+   * @memberof Context
+   * @description Draws an ellipse.
+   * @param {number} x - The x position of the ellipse.
+   * @param {number} y - The y position of the ellipse.
+   * @param {number} xr - The horizontal radius of the ellipse.
+   * @param {number} yr - The vertical radius of the ellipse.
+   * @returns This context.
+   */
   ellipse: function(x, y, xr, yr) {
     if (xr === 0 || yr === 0) {
       return;
@@ -886,18 +1016,46 @@ const Context = {
     this.restore();
   },
 
+  /**
+   * @function fillEllipse
+   * @memberof Context
+   * @description Draws and fills an ellipse.
+   * @param {number} x - The x position of the ellipse.
+   * @param {number} y - The y position of the ellipse.
+   * @param {number} xr - The horizontal radius of the ellipse.
+   * @param {number} yr - The vertical radius of the ellipse.
+   * @returns This context.
+   */
   fillEllipse: function(x, y, xr, yr) {
     this.beginPath();
     this.ellipse(x, y, xr, yr);
     this.fill();
   },
 
+  /**
+   * @function strokeEllipse
+   * @memberof Context
+   * @description Draws an ellipse.
+   * @param {number} x - The x position of the ellipse.
+   * @param {number} y - The y position of the ellipse.
+   * @param {number} xr - The horizontal radius of the ellipse.
+   * @param {number} yr - The vertical radius of the ellipse.
+   * @returns This context.
+   */
   strokeEllipse: function(x, y, xr, yr) {
     this.beginPath();
     this.ellipse(x, y, xr, yr);
     this.stroke();
   },
 
+  /**
+   * @function path
+   * @memberof Context
+   * @description Draws a path of points.
+   * @param {array} points - The points to draw a path through.
+   * @param {boolean} close - Whether or not to close the path.
+   * @returns This context.
+   */
   path: function(points, close) {
     points.forEach(p => {
       this.lineTo(p.x, p.y);
@@ -907,18 +1065,45 @@ const Context = {
     }
   },
 
+  /**
+   * @function fillPath
+   * @memberof Context
+   * @description Draws a and fills path of points.
+   * @param {array} points - The points to draw a path through.
+   * @param {boolean} close - Whether or not to close the path.
+   * @returns This context.
+   */
   fillPath: function(points, close) {
     this.beginPath();
     this.path(points, close);
     this.fill();
   },
 
+  /**
+   * @function strokePath
+   * @memberof Context
+   * @description Draws and strokes a path of points.
+   * @param {array} points - The points to draw a path through.
+   * @param {boolean} close - Whether or not to close the path.
+   * @returns This context.
+   */
   strokePath: function(points, close) {
     this.beginPath();
     this.path(points, close);
     this.stroke();
   },
 
+  /**
+   * @function polygon
+   * @memberof Context
+   * @description Draws a polygon.
+   * @param {number} x - The x position of the polygon.
+   * @param {number} y - The y position of the polygon.
+   * @param {number} r - The radius of the polygon.
+   * @param {number} sides - The number of sides in the polygon.
+   * @param {number} rotation - The rotation of the polygon.
+   * @returns This context.
+   */
   polygon: function(x, y, r, sides, rotation) {
     this.save();
     this.translate(x, y);
@@ -932,18 +1117,52 @@ const Context = {
     this.restore();
   },
 
+  /**
+   * @function strokePolygon
+   * @memberof Context
+   * @description Draws and strokes a polygon.
+   * @param {number} x - The x position of the polygon.
+   * @param {number} y - The y position of the polygon.
+   * @param {number} r - The radius of the polygon.
+   * @param {number} sides - The number of sides in the polygon.
+   * @param {number} rotation - The rotation of the polygon.
+   * @returns This context.
+   */
   strokePolygon: function(x, y, r, sides, rotation) {
     this.beginPath();
     this.polygon(x, y, r, sides, rotation);
     this.stroke();
   },
 
+  /**
+   * @function fillPolygon
+   * @memberof Context
+   * @description Draws and fills a polygon.
+   * @param {number} x - The x position of the polygon.
+   * @param {number} y - The y position of the polygon.
+   * @param {number} r - The radius of the polygon.
+   * @param {number} sides - The number of sides in the polygon.
+   * @param {number} rotation - The rotation of the polygon.
+   * @returns This context.
+   */
   fillPolygon: function(x, y, r, sides, rotation) {
     this.beginPath();
     this.polygon(x, y, r, sides, rotation);
     this.fill();
   },
 
+  /**
+   * @function star
+   * @memberof Context
+   * @description Draws a star.
+   * @param {number} x - The x position of the star.
+   * @param {number} y - The y position of the star.
+   * @param {number} r0 - The inner radius of the star.
+   * @param {number} r1 - The outer radius of the star.
+   * @param {number} points - The number of points in the star.
+   * @param {number} rotation - The rotation of the star.
+   * @returns This context.
+   */
   star: function(x, y, r0, r1, points, rotation) {
     this.save();
     this.translate(x, y);
@@ -960,18 +1179,54 @@ const Context = {
     this.restore();
   },
 
+  /**
+   * @function strokeStar
+   * @memberof Context
+   * @description Draws and strokes a star.
+   * @param {number} x - The x position of the star.
+   * @param {number} y - The y position of the star.
+   * @param {number} r0 - The inner radius of the star.
+   * @param {number} r1 - The outer radius of the star.
+   * @param {number} points - The number of points in the star.
+   * @param {number} rotation - The rotation of the star.
+   * @returns This context.
+   */
   strokeStar: function(x, y, r0, r1, points, rotation) {
     this.beginPath();
     this.star(x, y, r0, r1, points, rotation);
     this.stroke();
   },
 
+  /**
+   * @function fillStar
+   * @memberof Context
+   * @description Draws and fill a star.
+   * @param {number} x - The x position of the star.
+   * @param {number} y - The y position of the star.
+   * @param {number} r0 - The inner radius of the star.
+   * @param {number} r1 - The outer radius of the star.
+   * @param {number} points - The number of points in the star.
+   * @param {number} rotation - The rotation of the star.
+   * @returns This context.
+   */
   fillStar: function(x, y, r0, r1, points, rotation) {
     this.beginPath();
     this.star(x, y, r0, r1, points, rotation);
     this.fill();
   },
 
+  /**
+   * @function fractalLine
+   * @memberof Context
+   * @description Draws a fractal line by iteratively calculating the center point of two lines and randomly offsetting it.
+   * @param {number} x0 - The starting x position of the line.
+   * @param {number} y0 - The starting y position of the line.
+   * @param {number} x1 - The ending x position of the line.
+   * @param {number} y1 - The ending y position of the line.
+   * @param {number} roughness - How much random offset is applied on each iteration.
+   * @param {number} iterations - How many iterations to run.
+   * @returns This context.
+   */
   fractalLine: function(x0, y0, x1, y1, roughness, iterations) {
     const dx = x1 - x0;
     const dy = y1 - y0;
@@ -997,12 +1252,35 @@ const Context = {
     this.path(path);
   },
 
+  /**
+   * @function strokeFractalLine
+   * @memberof Context
+   * @description Draws and strokes a fractal line by iteratively calculating the center point of two lines and randomly offsetting it.
+   * @param {number} x0 - The starting x position of the line.
+   * @param {number} y0 - The starting y position of the line.
+   * @param {number} x1 - The ending x position of the line.
+   * @param {number} y1 - The ending y position of the line.
+   * @param {number} roughness - How much random offset is applied on each iteration.
+   * @param {number} iterations - How many iterations to run.
+   * @returns This context.
+   */
   strokeFractalLine: function(x0, y0, x1, y1, roughness, iterations) {
     this.beginPath();
     this.fractalLine(x0, y0, x1, y1, roughness, iterations);
     this.stroke();
   },
 
+  /**
+   * @function heart
+   * @memberof Context
+   * @description Draws a heart.
+   * @param {number} x - The x position of the heart.
+   * @param {number} y - The y position of the heart.
+   * @param {number} w - The width the heart.
+   * @param {number} h - The height vertical radius of the heart.
+   * @param {number} rotation - The rotation of the heart.
+   * @returns This context.
+   */
   heart: function(x, y, w, h, rotation) {
     const path = [];
     const res = Math.sqrt(w * h);
@@ -1020,12 +1298,34 @@ const Context = {
     this.restore();
   },
 
+  /**
+   * @function strokeHeart
+   * @memberof Context
+   * @description Draws and strokes a heart.
+   * @param {number} x - The x position of the heart.
+   * @param {number} y - The y position of the heart.
+   * @param {number} w - The width the heart.
+   * @param {number} h - The height vertical radius of the heart.
+   * @param {number} rotation - The rotation of the heart.
+   * @returns This context.
+   */
   strokeHeart: function(x, y, w, h, rotation) {
     this.beginPath();
     this.heart(x, y, w, h, rotation);
     this.stroke();
   },
 
+  /**
+   * @function fillHeart
+   * @memberof Context
+   * @description Draws and fills a heart.
+   * @param {number} x - The x position of the heart.
+   * @param {number} y - The y position of the heart.
+   * @param {number} w - The width the heart.
+   * @param {number} h - The height vertical radius of the heart.
+   * @param {number} rotation - The rotation of the heart.
+   * @returns This context.
+   */
   fillHeart: function(x, y, w, h, rotation) {
     this.beginPath();
     this.heart(x, y, w, h, rotation);
