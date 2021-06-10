@@ -1,14 +1,34 @@
+/**
+ * Creates an animation that runs a render callback function every frame. Also keeps track of fps, which is passed to the render callback function.
+ * @example
+ * const anim = new Anim(render, false);
+ * anim.run();
+ * function render() {
+ *   // render code
+ * }
+ */
 export class Anim {
+  /**
+   * Constructor
+   * @param {function} renderCallback - A function that will be called on every frame.
+   * @param {boolean} running - Whether or not the animation should run immediately.
+   */
   constructor(renderCallback, running) {
     this._fps = "";
     this._renderCallback = renderCallback;
     this.running = running;
   }
 
+  /**
+   * Starts the animation running.
+   */
   run() {
     this.running = true;
   }
 
+  /**
+   * Stops the animation.
+   */
   stop() {
     this.running = false;
   }
@@ -29,6 +49,9 @@ export class Anim {
     }
   }
 
+  /**
+   * Gets and sets the running state of the animation.
+   */
   get running() {
     return this._running;
   }
