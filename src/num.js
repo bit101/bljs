@@ -134,6 +134,9 @@ export const Num = {
       py <= ry + rh;
   },
 
+  /**
+   * Finds the point where two lines intersect.
+   */
   lineIntersect: function(p0, p1, p2, p3) {
     const A1 = p1.y - p0.y;
     const B1 = p0.x - p1.x;
