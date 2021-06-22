@@ -1,9 +1,10 @@
 import { Num} from "./num.js";
 
 export class DragPoint {
-  constructor(x, y, context2d, moveHandler) {
+  constructor(x, y, label, context2d, moveHandler) {
     this.x = x;
     this.y = y;
+    this.label = label;
     this.context = context2d;
     this.canvas = this.context.canvas;
     this.moveHandler = moveHandler;
@@ -24,6 +25,10 @@ export class DragPoint {
     this.context.fillCircle(0, 0, 10);
     this.context.strokeCircle(0, 0, 10);
     this.context.strokeCircle(0, 0, 1);
+    this.context.fillStyle = "#000";
+    if (this.label) {
+      this.context.fillText(this.label, 14, 0);
+    }
     this.context.restore();
   }
 

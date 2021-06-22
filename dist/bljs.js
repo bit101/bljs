@@ -211,35 +211,63 @@ var bljs = (function (exports) {
         py <= ry + rh;
     },
 
-    segmentIntersect: function(p0, p1, p2, p3) {
-      const A1 = p1.y - p0.y,
-        B1 = p0.x - p1.x,
-        C1 = A1 * p0.x + B1 * p0.y,
-        A2 = p3.y - p2.y,
-        B2 = p2.x - p3.x,
-        C2 = A2 * p2.x + B2 * p2.y,
-        denominator = A1 * B2 - A2 * B1;
+    lineIntersect: function(p0, p1, p2, p3) {
+      const A1 = p1.y - p0.y;
+      const B1 = p0.x - p1.x;
+      const C1 = A1 * p0.x + B1 * p0.y;
+      const A2 = p3.y - p2.y;
+      const B2 = p2.x - p3.x;
+      const C2 = A2 * p2.x + B2 * p2.y;
+      const denominator = A1 * B2 - A2 * B1;
 
       if (denominator === 0) {
         return null;
       }
+      return {
+        x: (B2 * C1 - B1 * C2) / denominator,
+        y: (A1 * C2 - A2 * C1) / denominator,
+      };
+    },
 
-      const intersectX = (B2 * C1 - B1 * C2) / denominator,
-        intersectY = (A1 * C2 - A2 * C1) / denominator,
-        rx0 = (intersectX - p0.x) / (p1.x - p0.x),
-        ry0 = (intersectY - p0.y) / (p1.y - p0.y),
-        rx1 = (intersectX - p2.x) / (p3.x - p2.x),
-        ry1 = (intersectY - p2.y) / (p3.y - p2.y);
+    segmentIntersect: function(p0, p1, p2, p3) {
+      const pI = Num.lineIntersect(p0, p1, p2, p3);
+
+      const rx0 = (pI.x - p0.x) / (p1.x - p0.x);
+      const ry0 = (pI.y - p0.y) / (p1.y - p0.y);
+      const rx1 = (pI.x - p2.x) / (p3.x - p2.x);
+      const ry1 = (pI.y - p2.y) / (p3.y - p2.y);
 
       if (((rx0 >= 0 && rx0 <= 1) || (ry0 >= 0 && ry0 <= 1)) &&
         ((rx1 >= 0 && rx1 <= 1) || (ry1 >= 0 && ry1 <= 1))) {
-        return {
-          x: intersectX,
-          y: intersectY,
-        };
+        return pI;
       }
-
       return null;
+    },
+
+    orthoCenter: function(p0, p1, p2) {
+      let temp;
+      if (p1.y - p0.y === 0) {
+        temp = p1;
+        p1 = p2;
+        p2 = temp;
+      } else if (p2.y - p1.y === 0) {
+        temp = p1;
+        p1 = p0;
+        p0 = temp;
+      }
+      const slopeA = -(p1.x - p0.x) / (p1.y - p0.y);
+      const pA = {
+        x: p2.x + 100,
+        y: p2.y + slopeA * 100,
+      };
+      const slopeB = -(p2.x - p1.x) / (p2.y - p1.y);
+      console.log(slopeB);
+      const pB = {
+        x: p0.x + 100,
+        y: p0.y + 100 * slopeB,
+      };
+
+      return Num.lineIntersect(p2, pA, p0, pB);
     },
 
     tangentPointToCircle: function(x, y, cx, cy, cr, anticlockwise) {
@@ -1754,9 +1782,10 @@ var bljs = (function (exports) {
   }
 
   class DragPoint {
-    constructor(x, y, context2d, moveHandler) {
+    constructor(x, y, label, context2d, moveHandler) {
       this.x = x;
       this.y = y;
+      this.label = label;
       this.context = context2d;
       this.canvas = this.context.canvas;
       this.moveHandler = moveHandler;
@@ -1777,6 +1806,10 @@ var bljs = (function (exports) {
       this.context.fillCircle(0, 0, 10);
       this.context.strokeCircle(0, 0, 10);
       this.context.strokeCircle(0, 0, 1);
+      this.context.fillStyle = "#000";
+      if (this.label) {
+        this.context.fillText(this.label, 14, 0);
+      }
       this.context.restore();
     }
 
