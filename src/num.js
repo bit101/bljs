@@ -155,6 +155,9 @@ export const Num = {
     };
   },
 
+  /**
+   * Finds the point where two line segments intersect (if any).
+   */
   segmentIntersect: function(p0, p1, p2, p3) {
     const pI = Num.lineIntersect(p0, p1, p2, p3);
 
