@@ -174,6 +174,7 @@ export const Num = {
   },
 
   orthoCenter: function(p0, p1, p2) {
+    // brute force and kludgy
     let temp;
     if (p1.y - p0.y === 0) {
       temp = p1;
@@ -195,8 +196,30 @@ export const Num = {
       x: p0.x + 100,
       y: p0.y + 100 * slopeB,
     };
-
     return Num.lineIntersect(p2, pA, p0, pB);
+  },
+
+  circumCenter: function(p0, p1, p2) {
+    // horribly unoptimized, but it works.
+    const pA = {
+      x: (p0.x + p1.x) / 2,
+      y: (p0.y + p1.y) / 2,
+    };
+    const a = Math.atan2(p1.y - p0.y, p1.x - p0.x) + Math.PI / 2;
+    const pB = {
+      x: pA.x + Math.cos(a),
+      y: pA.y + Math.sin(a),
+    };
+    const pC = {
+      x: (p0.x + p2.x) / 2,
+      y: (p0.y + p2.y) / 2,
+    };
+    const b = Math.atan2(p2.y - p0.y, p2.x - p0.x) + Math.PI / 2;
+    const pD = {
+      x: pC.x + Math.cos(b),
+      y: pC.y + Math.sin(b),
+    };
+    return Num.lineIntersect(pA, pB, pC, pD);
   },
 
   tangentPointToCircle: function(x, y, cx, cy, cr, anticlockwise) {
