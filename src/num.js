@@ -134,24 +134,31 @@ export const Num = {
       py <= ry + rh;
   },
 
+  _abcFromPoints: function(p0, p1) {
+    const a = p1.y - p0.y;
+    const b = p0.x - p1.x;
+    const c = a * p0.x + b * p0.y;
+    return { a, b, c };
+  },
+
   /**
    * Finds the point where two lines intersect.
    */
   lineIntersect: function(p0, p1, p2, p3) {
-    const A1 = p1.y - p0.y;
-    const B1 = p0.x - p1.x;
-    const C1 = A1 * p0.x + B1 * p0.y;
-    const A2 = p3.y - p2.y;
-    const B2 = p2.x - p3.x;
-    const C2 = A2 * p2.x + B2 * p2.y;
-    const denominator = A1 * B2 - A2 * B1;
+    const line0 = Num._abcFromPoints(p0, p1);
+    const line1 = Num._abcFromPoints(p2, p3);
+    return Num._lineIntersectABC(line0.a, line0.b, line0.c, line1.a, line1.b, line1.c);
+  },
 
-    if (denominator === 0) {
+  _lineIntersectABC: function(a0, b0, c0, a1, b1, c1) {
+    const d = a0 * b1 - a1 * b0;
+
+    if (d === 0) {
       return null;
     }
     return {
-      x: (B2 * C1 - B1 * C2) / denominator,
-      y: (A1 * C2 - A2 * C1) / denominator,
+      x: (b1 * c0 - b0 * c1) / d,
+      y: (a0 * c1 - a1 * c0) / d,
     };
   },
 
@@ -173,53 +180,41 @@ export const Num = {
     return null;
   },
 
-  orthoCenter: function(p0, p1, p2) {
-    // brute force and kludgy
-    let temp;
-    if (p1.y - p0.y === 0) {
-      temp = p1;
-      p1 = p2;
-      p2 = temp;
-    } else if (p2.y - p1.y === 0) {
-      temp = p1;
-      p1 = p0;
-      p0 = temp;
-    }
-    const slopeA = -(p1.x - p0.x) / (p1.y - p0.y);
-    const pA = {
-      x: p2.x + 100,
-      y: p2.y + slopeA * 100,
-    };
-    const slopeB = -(p2.x - p1.x) / (p2.y - p1.y);
-    console.log(slopeB);
-    const pB = {
-      x: p0.x + 100,
-      y: p0.y + 100 * slopeB,
-    };
-    return Num.lineIntersect(p2, pA, p0, pB);
+  _perpBisector(p0, p1, line) {
+    const midx = (p0.x + p1.x) / 2;
+    const midy = (p0.y + p1.y) / 2;
+    const c = -line.b * midx + line.a * midy;
+    const a = -line.b;
+    const b = line.a;
+    return {a, b, c};
   },
 
   circumCenter: function(p0, p1, p2) {
-    // horribly unoptimized, but it works.
-    const pA = {
-      x: (p0.x + p1.x) / 2,
-      y: (p0.y + p1.y) / 2,
+    const line0 = Num._abcFromPoints(p0, p1);
+    const bs0 = Num._perpBisector(p0, p1, line0);
+    const line1 = Num._abcFromPoints(p1, p2);
+    const bs1 = Num._perpBisector(p1, p2, line1);
+
+    return Num._lineIntersectABC(bs0.a, bs0.b, bs0.c, bs1.a, bs1.b, bs1.c);
+  },
+
+  centroid: function(p0, p1, p2) {
+    return {
+      x: (p0.x + p1.x + p2.x) / 3,
+      y: (p0.y + p1.y + p2.y) / 3,
     };
-    const a = Math.atan2(p1.y - p0.y, p1.x - p0.x) + Math.PI / 2;
-    const pB = {
-      x: pA.x + Math.cos(a),
-      y: pA.y + Math.sin(a),
+  },
+
+  orthoCenter: function(p0, p1, p2) {
+    const cc = Num.circumCenter(p0, p1, p2);
+    if (!cc) {
+      return null;
+    }
+    const ct = Num.centroid(p0, p1, p2);
+    return {
+      x: 3 * ct.x - 2 * cc.x,
+      y: 3 * ct.y - 2 * cc.y,
     };
-    const pC = {
-      x: (p0.x + p2.x) / 2,
-      y: (p0.y + p2.y) / 2,
-    };
-    const b = Math.atan2(p2.y - p0.y, p2.x - p0.x) + Math.PI / 2;
-    const pD = {
-      x: pC.x + Math.cos(b),
-      y: pC.y + Math.sin(b),
-    };
-    return Num.lineIntersect(pA, pB, pC, pD);
   },
 
   tangentPointToCircle: function(x, y, cx, cy, cr, anticlockwise) {
