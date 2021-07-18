@@ -17,6 +17,20 @@ export const Context = {
   },
 
   /**
+   * @function forEach
+   * @memberof Context
+   * @description Loops thorugh all pixels and executes a callback for each.
+   * @param {function} callback - A callback funciton that takes the x, y coordinate being processed.
+   */
+  forEach: function(res, callback) {
+    for (let x = 0; x < this.canvas.width; x += res) {
+      for (let y = 0; y < this.canvas.height; y += res) {
+        callback(x, y);
+      }
+    }
+  },
+
+  /**
    * @function setShadow
    * @memberof Context
    * @description Sets all of the dropshadow parameters.
