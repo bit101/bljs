@@ -1,6 +1,7 @@
 import { Anim } from "./anim.js";
 import { Canvas } from "./canvas.js";
 import { Color } from "./color.js";
+import { Complex } from "./complex.js";
 import { Context} from "./context.js";
 import { DragPoint } from "./dragpoint.js";
 import { FPS } from "./fps.js";
@@ -18,6 +19,7 @@ export {
   Canvas,
   Color,
   Context,
+  Complex,
   DragPoint,
   Noise,
   Num,
