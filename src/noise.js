@@ -1,4 +1,10 @@
 /*
+ * Ported pretty directly from https://github.com/josephg/noisejs
+ * Just some minor structural tweaks and a few convenience methods added.
+ * Original attribution below.
+ */
+
+/*
  * A speed-improved perlin and simplex noise algorithms for 2D.
  *
  * Based on example code by Stefan Gustavson (stegu@itn.liu.se).
